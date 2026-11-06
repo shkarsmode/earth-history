@@ -78,7 +78,7 @@ export const CHAPTERS: Chapter[] = [
       [0.02, 'Землю и Луну продолжают бомбардировать астероиды и кометы.'],
       [0.5, 'Позже лава заливает огромные кратеры на Луне — так рождаются тёмные лунные «моря».'],
     ],
-    cam: [{ u: 0, rh: 0.3, lat: 14, lon: 300, phase: 60, tilt: 20, ox: -0.35, moonAz: 6, moonEl: 2 }, { u: 1, rh: 0.3, lat: 10, lon: 350, phase: 55, tilt: 20, ox: -0.35, moonAz: 6, moonEl: 2 }],
+    cam: [{ u: 0, rh: 0.3, lat: 14, lon: 300, phase: 60, tilt: 20, ox: -0.35, moonAz: 19, moonEl: 5 }, { u: 1, rh: 0.3, lat: 10, lon: 350, phase: 55, tilt: 20, ox: -0.35, moonAz: 21, moonEl: 5 }],
   },
   {
     id: 'life', title: 'Зарождение жизни', eon: 'archean', y0: Ga(3.8), y1: Ga(3.4), dur: 24,
