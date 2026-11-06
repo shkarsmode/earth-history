@@ -160,9 +160,11 @@ export function jurassic(b: PixBuf, t: number, c: Ctx) {
   }
   // pterosaurs
   for (let i = 0; i < 3; i++) drawSprite(b, 'pterosaur', wrapX(W * 0.2 + i * 70 + t * (18 + i * 4), W + 60) - 30, H * (0.18 + i * 0.07) + Math.sin(t + i) * 4, t * 1.5 + i);
-  // foreground: cycads, ferns, horsetails
-  for (let i = 0; i < 6; i++) cycad(b, hash(i * 3.3 + 7) * W, H - 4 - hash(i) * 8, 14 + hash(i * 2) * 8, STY.jurassic, i + 500);
-  for (let i = 0; i < 8; i++) treefern(b, hash(i * 5.7 + 2) * W, H + 2, 26 + hash(i * 4) * 18, STY.jurassic, i + 600, Math.sin(t * 0.7) * 1.5);
+  // near bank: big conifers framing the view, cycads and tree ferns
+  conifer(b, W * 0.04, bank[Math.round(W * 0.04)] + 6, 120, STY.jurassic, 450);
+  conifer(b, W * 0.97, bank[Math.round(W * 0.97)] + 6, 104, STY.jurassic, 451);
+  for (let i = 0; i < 7; i++) { const x = W * (0.12 + i * 0.13) + (hash(i * 3.3 + 7) - 0.5) * 20; cycad(b, x, bank[Math.round(clamp(x, 0, W - 1))] + 8 + hash(i) * 6, 16 + hash(i * 2) * 10, STY.jurassic, i + 500); }
+  for (let i = 0; i < 6; i++) { const x = hash(i * 5.7 + 2) * W; treefern(b, x, bank[Math.round(clamp(x, 0, W - 1))] + 14, 30 + hash(i * 4) * 20, STY.jurassic, i + 600, Math.sin(t * 0.7) * 1.5); }
   grass(b, bank, 0, W, 0.5, 6, [hex('#4e7a2a'), hex('#6a9a34'), hex('#3a5e22')], t, 7);
 }
 
