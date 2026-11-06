@@ -340,7 +340,7 @@ void main() {
   // ocean sun glint (quantized blob)
   if (spec > 0.0 && uOcean > 0.0 && uFlat < 0.5) {
     vec3 Hh = normalize(L + V);
-    float g = pow(max(dot(N, Hh), 0.0), 260.0) * step(0.0, ndl);
+    float g = pow(max(dot(N, Hh), 0.0), 700.0) * step(0.0, ndl);
     float gq = qband(clamp(g * 2.2, 0.0, 1.0), 3.0, th, 0.5);
     col = mix(col, mix(uOceanShallow * 1.6, vec3(1.0, 0.97, 0.88), gq), gq * 0.95);
   }
