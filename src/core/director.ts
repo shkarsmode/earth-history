@@ -58,6 +58,11 @@ export class Director {
 
   yearOf(ch: Chapter, u: number): number {
     if (ch.y0 === ch.y1) return ch.y0;
+    if (ch.ykeys) {
+      const k = ch.ykeys;
+      for (let i = 0; i < k.length - 1; i++) if (u <= k[i + 1][0]) return k[i][1] + ((k[i + 1][1] - k[i][1]) * (u - k[i][0])) / (k[i + 1][0] - k[i][0]);
+      return k[k.length - 1][1];
+    }
     if (ch.map === 'log') {
       const a0 = 2026 - ch.y0, a1 = 2026 - ch.y1;
       if (a0 > 0 && a1 > 0) return 2026 - Math.exp(Math.log(a0) + (Math.log(a1) - Math.log(a0)) * u);

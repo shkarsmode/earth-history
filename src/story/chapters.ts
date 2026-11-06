@@ -25,6 +25,7 @@ export interface Chapter {
   y0: number;
   y1: number;
   map?: 'lin' | 'log';
+  ykeys?: [number, number][]; // explicit (progress, year) pairs: slow the clock around key events
   dur: number;
   subs: [number, string][];
   cam: CamKey[];
@@ -312,6 +313,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     id: 'space', title: 'Космическая эра', eon: 'history', y0: 1945, y1: 1975, dur: 24,
+    ykeys: [[0, 1945], [0.38, 1957.75], [0.56, 1961.3], [0.74, 1968.95], [0.96, 1969.7], [1, 1975]],
     subs: [
       [0.02, 'После Второй мировой войны начинается космическая гонка СССР и США.'],
       [0.38, '4 октября 1957 — первый искусственный спутник. 12 апреля 1961 — Юрий Гагарин, первый человек в космосе.'],
