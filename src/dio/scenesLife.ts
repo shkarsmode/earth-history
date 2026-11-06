@@ -127,10 +127,12 @@ export function permian(b: PixBuf, t: number, c: Ctx) {
       b.u32[y * W + x] = col;
     }
   }
-  // dead Glossopteris trees, cracked foreground
-  for (let i = 0; i < 7; i++) deadtree(b, hash(i * 4.4) * W, H - 4 - hash(i) * 30, 30 + hash(i * 2) * 30, hex('#140806'), i * 5);
+  // a dark basalt ridge in the foreground with faintly glowing cracks, dead Glossopteris trees
+  const fg = ridge(b, { base: H * 0.76, amp: 6, freq: 0.015, seed: 72, fill: hex('#1a0c0a'), edge: hex('#4a1e12'),
+    shadeFn: (x, y, d) => (d > 1 && tn2(x * 0.3, y * 0.4) > 0.8 ? (tn2(x * 0.3 + t * 0.5, y) > 0.55 ? hex('#a83a14') : hex('#3a1a10')) : null) });
+  for (let i = 0; i < 6; i++) { const x = hash(i * 4.4) * W; deadtree(b, x, fg[Math.round(clamp(x, 0, W - 1))] + 2, 34 + hash(i * 2) * 30, hex('#100604'), i * 5); }
   const lx = W * 0.3 + t * 3;
-  drawSprite(b, 'lystrosaurus', lx, H - 12, t, { tint: hex('#3a140a'), tintK: 0.35 });
+  drawSprite(b, 'lystrosaurus', lx, fg[Math.round(clamp(lx, 0, W - 1))] + 4, t, { tint: hex('#3a140a'), tintK: 0.3 });
   // falling ash
   for (let i = 0; i < 300; i++) { const y = (hash(i * 1.9) * H + t * (10 + hash(i) * 10)) % H, x = wrapX(hash(i * 3.3) * W + Math.sin(t + i) * 6 + t * 4, W); b.set(Math.round(x), Math.round(y), hash(i * 7) > 0.6 ? hex('#8a7a70') : hex('#5a4a44')); }
   grade(b, hex('#5a1a08'), 0.12);
