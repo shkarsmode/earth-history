@@ -237,6 +237,14 @@ async function boot() {
     renderFrame(false);
     requestAnimationFrame(loop);
   }
+  // keep the position across reloads (dev hot-reload, accidental F5)
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('earth-pos') ?? 'null');
+    if (saved && typeof saved.t === 'number') { director.seek(saved.t); director.speedIdx = saved.s ?? director.speedIdx; director.playing = saved.p ?? true; }
+  } catch { /* storage unavailable */ }
+  window.addEventListener('beforeunload', () => {
+    try { sessionStorage.setItem('earth-pos', JSON.stringify({ t: director.t, s: director.speedIdx, p: director.playing })); } catch { /* ignore */ }
+  });
   document.getElementById('boot')?.remove();
   requestAnimationFrame((n) => { last = n; loop(n); });
 

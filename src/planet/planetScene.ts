@@ -146,6 +146,7 @@ export class PlanetScene {
         uTime: { value: 0 },
         uCloudAlpha: { value: 1 },
         uSoot: { value: 0 },
+        uAurora: { value: 0 },
       },
     });
     this.atmoMat = new THREE.ShaderMaterial({
@@ -337,7 +338,8 @@ export class PlanetScene {
     cu.uTime.value = tAmb;
     cu.uCloudAlpha.value = s.cloudCover > 0.02 ? 1 : 0;
     cu.uSoot.value = s.scorch;
-    this.clouds.visible = s.cloudCover > 0.02;
+    cu.uAurora.value = year > -3.6e9 ? 0.85 : 0;
+    this.clouds.visible = s.cloudCover > 0.02 || year > -3.6e9;
 
     const au = this.atmoMat.uniforms;
     (au.uAtmoColor.value as THREE.Color).setRGB(...s.atmoColor);

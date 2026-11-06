@@ -19,14 +19,27 @@ uniform float uStorm;
 uniform float uTime;
 uniform float uCloudAlpha;
 uniform float uSoot;          // impact winter: clouds turn brown-black
+uniform float uAurora;        // auroral ovals on the night side (needs a magnetic field)
 void main() {
   vec3 n = normalize(vObj);
   float d = cloudDensity(n);
   float th = bayer8(gl_FragCoord.xy);
   float a = smoothstep(0.14, 0.24, d) * uCloudAlpha;
-  if (a <= th) discard;
   vec3 N = normalize(vWorldN);
   float ndl = dot(N, normalize(uSunDir));
+  // aurora: a ragged ring near 68° latitude, curtains drifting, only in darkness
+  float au = 0.0;
+  if (uAurora > 0.0 && ndl < -0.06) {
+    float lat = asin(clamp(n.y, -1.0, 1.0)) * 57.2958;
+    float lon = atan(n.x, n.z);
+    float ring = 1.0 - smoothstep(0.0, 3.2, abs(abs(lat) - 67.0 + 2.5 * sin(lon * 3.0 + uTime * 0.15)));
+    float curtain = smoothstep(0.2, 0.75, snoise(vec3(lon * 7.0, uTime * 0.25, sign(lat) * 5.0)) * 0.5 + 0.5);
+    au = ring * curtain * uAurora * smoothstep(-0.06, -0.25, ndl);
+  }
+  if (a <= th) {
+    if (au > th) { fragColor = vec4(au > 0.55 ? vec3(0.62, 1.0, 0.78) : vec3(0.18, 0.78, 0.5), 1.0); return; }
+    discard;
+  }
   float toward = cloudDensity(normalize(n + uSunObj * 0.035));
   float self = smoothstep(0.0, 0.5, toward - d + 0.15);
   float lit = clamp(ndl * 1.3 + 0.12, 0.0, 1.0) * (1.0 - 0.45 * self);
@@ -36,6 +49,7 @@ void main() {
   float tw = smoothstep(-0.05, 0.0, ndl) * (1.0 - smoothstep(0.0, 0.06, ndl));
   col = mix(col, uTwilight * (0.55 + 0.45 * band), step(th, tw * 0.6));
   if (uSoot > 0.0) col = mix(col, vec3(0.16, 0.12, 0.1) * (0.4 + 0.6 * band), step(th, uSoot));
+  if (au > th) col = mix(col, vec3(0.3, 0.9, 0.6), 0.6);
   // lightning in thick storm cells on the night side
   if (uStorm > 0.0 && d > 0.45) {
     vec3 cell = floor(n * 26.0);
