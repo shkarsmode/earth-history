@@ -299,7 +299,7 @@ function underwater(b: PixBuf, t: number, top: string, bottom: string, floorCol:
       }
     }
   }
-  return ridge(b, { base: H * 0.83, amp: 7, freq: 0.015, seed: 51, fill: hex(floorCol), edge: hex(floorEdge),
+  return ridge(b, { base: H * 0.7, amp: 7, freq: 0.015, seed: 51, fill: hex(floorCol), edge: hex(floorEdge),
     shadeFn: (x, y, d) => (tn2(x * 0.25, y * 0.25) > 0.7 ? shade(hex(floorCol), 0.8) : tn2(x * 0.5 + 9, y * 0.5) > 0.82 ? shade(hex(floorCol), 1.15) : null) });
 }
 
@@ -348,8 +348,8 @@ export function cambrian(b: PixBuf, t: number, c: Ctx) {
     const by = fl[Math.max(0, Math.min(W - 1, Math.round(x)))];
     const kind = hash(i * 2.9);
     if (kind < 0.4) { // tube sponge
-      const h = 10 + hash(i) * 20;
-      for (let y = 0; y < h; y++) { b.hline(Math.round(x - 2), Math.round(x + 2), Math.round(by - y), y > h - 2 ? hex('#3a2a20') : hex('#d8904a')); b.set(Math.round(x - 2), Math.round(by - y), hex('#a86a3a')); }
+      const h = 14 + hash(i) * 30, r = 2 + Math.round(hash(i * 3) * 2);
+      for (let y = 0; y < h; y++) { const w = r + (y > h - 4 ? 1 : 0); b.hline(Math.round(x - w), Math.round(x + w), Math.round(by - y), y > h - 2 ? hex('#3a2a20') : (y % 6 === 0 ? hex('#e8a860') : hex('#d8904a'))); b.set(Math.round(x - w), Math.round(by - y), hex('#a86a3a')); b.set(Math.round(x + w), Math.round(by - y), hex('#b8783e')); }
     } else if (kind < 0.75) { // algae fronds
       for (let s = 0; s < 4; s++) {
         let px = x + s * 2, py = by;

@@ -130,6 +130,7 @@ async function boot() {
       else if (dio.b < 1 && tl > tB - 1.2) shot.rh *= 1 + 1.8 * (1 - smooth((tl - (tB - 1.2)) / 2.4));
       // dioramas are drawn on the CPU: cap them at 30 fps (pixel art does not need more)
       if (mix > 0 && (forceDio || Math.abs(director.amb - lastDioAmb) >= 1 / 30 - 1e-4)) {
+        display.dio.clear(0xff000000);
         SCENES[dio.id](display.dio, Math.max(0, tl - tA + 1.2), { amb: director.amb, year, u: where.u });
         lastDioAmb = director.amb;
       }

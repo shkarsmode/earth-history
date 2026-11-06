@@ -39,7 +39,7 @@ export function devonian(b: PixBuf, t: number, c: Ctx) {
   for (let i = 0; i < 18; i++) { const x = hash(i * 2.3) * W; conifer(b, x, far[Math.round(clamp(x, 0, W - 1))] + 1, 26 + hash(i) * 18, silStyle('#56724e'), i); }
   water(b, hy, hex('#3e6a6a'), 0.4, t, { ripple: 1, sparkle: hex('#e6f4f4'), sparkleN: 30 });
   // muddy shore with the first low plants
-  const shore = ridge(b, { base: H * 0.78, amp: 7, freq: 0.01, seed: 64, fill: hex('#5e4a32'), edge: hex('#7a6444'),
+  const shore = ridge(b, { base: H * 0.72, amp: 7, freq: 0.01, seed: 64, fill: hex('#5e4a32'), edge: hex('#7a6444'),
     shadeFn: (x, y, d) => (d < 2 ? hex('#6e5a3c') : tn2(x * 0.2, y * 0.3) > 0.7 ? hex('#4e3e2a') : tn2(x * 0.15 + 4, y * 0.2) > 0.72 ? hex('#3e5a2a') : null) });
   for (let i = 0; i < 70; i++) { // Psilophyton/Rhynia-like forked stems
     const x = hash(i * 1.91) * W;
@@ -172,7 +172,7 @@ export function cretaceous(b: PixBuf, t: number, c: Ctx) {
   const plain = ridge(b, { base: hy, amp: 3, freq: 0.03, seed: 92, fill: hex('#6a6a3a'), edge: hex('#8a8444') });
   for (let i = 0; i < 26; i++) { const x = hash(i * 1.3 + 9) * W; broadleaf(b, x, plain[Math.round(clamp(x, 0, W - 1))], 10 + hash(i) * 8, silStyle(i % 2 ? '#5a5a3a' : '#646640'), i + 700); }
   // grassland-less ground: ferns & low flowering shrubs
-  const fg = ridge(b, { base: H * 0.84, amp: 5, freq: 0.01, seed: 93, fill: hex('#4e5e2a'), edge: hex('#6a7a34'),
+  const fg = ridge(b, { base: H * 0.76, amp: 5, freq: 0.01, seed: 93, fill: hex('#4e5e2a'), edge: hex('#6a7a34'),
     shadeFn: (x, y, d) => (tn2(x * 0.2, y * 0.2) > 0.68 ? hex('#3e4e22') : tn2(x * 0.4 + 2, y * 0.4) > 0.86 ? hex('#e88aa8') : null) });
   // Triceratops herd in the middle distance
   for (let i = 0; i < 4; i++) drawSprite(b, 'triceratops', wrapX(W * 0.45 + i * 46 + t * 2, W + 120) - 60, Math.round(H * 0.72) + (i % 2) * 4, t + i * 0.7, { tint: hex('#f0a060'), tintK: 0.2 });
@@ -180,7 +180,7 @@ export function cretaceous(b: PixBuf, t: number, c: Ctx) {
   for (let i = 0; i < 4; i++) broadleaf(b, hash(i * 7.3 + 1) * W, fg[Math.round(clamp(hash(i * 7.3 + 1) * W, 0, W - 1))] + 2, 26 + hash(i) * 10, STY.cretaceous, i + 800, i % 2 ? hex('#f6d6e6') : hex('#ffffff'));
   // T. rex stalking in the foreground
   const tx = W * 0.25 + t * 6;
-  drawSprite(b, 'trex', tx, H - 6, t * 0.9);
+  drawSprite(b, 'trex', tx, fg[Math.round(clamp(tx, 0, W - 1))] + 16, t * 0.9);
   grass(b, fg, 0, W, 0.35, 5, [hex('#5a7a2a'), hex('#4a6a22')], t, 9);
 }
 
@@ -193,11 +193,11 @@ export function paleogene(b: PixBuf, t: number, c: Ctx) {
   const jungle = ridge(b, { base: hy + 6, amp: 6, freq: 0.04, seed: 102, fill: hex('#2e6a3a'), edge: hex('#3e8044') });
   for (let i = 0; i < 20; i++) { const x = hash(i * 2.7 + 3) * W; palm(b, x, jungle[Math.round(clamp(x, 0, W - 1))] + 2, 24 + hash(i) * 14, silStyle('#2a5a32'), i + 900); }
   water(b, Math.round(H * 0.7), hex('#3a6a5a'), 0.45, t, { ripple: 1, sparkle: hex('#f0f6e8'), sparkleN: 20, bottom: Math.round(H * 0.8) });
-  const fg = ridge(b, { base: H * 0.84, amp: 4, freq: 0.012, seed: 103, fill: hex('#4a6a2e'), edge: hex('#628a3a') });
+  const fg = ridge(b, { base: H * 0.76, amp: 4, freq: 0.012, seed: 103, fill: hex('#4a6a2e'), edge: hex('#628a3a') });
   for (let i = 0; i < 4; i++) broadleaf(b, hash(i * 9.1 + 4) * W, fg[Math.round(clamp(hash(i * 9.1 + 4) * W, 0, W - 1))] + 3, 30 + hash(i) * 12, STY.tropic, i + 950);
   for (let i = 0; i < 3; i++) palm(b, hash(i * 4.7 + 8) * W, H + 2, 60 + hash(i) * 30, STY.tropic, i + 980, Math.sin(t * 0.6) * 2);
   for (let i = 0; i < 3; i++) drawSprite(b, 'eohippus', wrapX(W * 0.3 + i * 30 + t * 7, W + 40) - 20, fg[Math.round(clamp(W * 0.3 + i * 30, 0, W - 1))] + 6, t * 1.2 + i);
-  drawSprite(b, 'smallmammal', W * 0.62 + Math.sin(t) * 6, H - 8, t * 2);
+  drawSprite(b, 'smallmammal', W * 0.62 + Math.sin(t) * 6, fg[Math.round(W * 0.62)] + 10, t * 2);
   for (let i = 0; i < 5; i++) drawSprite(b, 'bird', wrapX(t * (20 + i * 5) + i * 90, W + 20) - 10, H * (0.15 + i * 0.04), t * 2 + i);
   grass(b, fg, 0, W, 0.5, 5, [hex('#4e7a2e'), hex('#6a9a3a')], t, 11);
 }
@@ -214,7 +214,7 @@ export function savanna(b: PixBuf, t: number, c: Ctx) {
     shadeFn: (x, y, d) => (Math.abs(x - vx) < 30 && y < hy - 46 && d < 12 ? hex('#f0e6ee') : null) });
   const plain = ridge(b, { base: hy + 2, amp: 2, freq: 0.03, seed: 112, fill: hex('#a07a3a'), edge: hex('#c09448') });
   for (let i = 0; i < 9; i++) { const x = hash(i * 3.9 + 2) * W; acacia(b, x, plain[Math.round(clamp(x, 0, W - 1))] + 1, 10 + hash(i) * 8, silStyle('#4a3a2e'), i + 1000); }
-  const fg = ridge(b, { base: H * 0.86, amp: 3, freq: 0.01, seed: 113, fill: hex('#b88a3e'), edge: hex('#d0a450'),
+  const fg = ridge(b, { base: H * 0.76, amp: 3, freq: 0.01, seed: 113, fill: hex('#b88a3e'), edge: hex('#d0a450'),
     shadeFn: (x, y, d) => (tn2(x * 0.3, y * 0.3) > 0.7 ? hex('#a0783a') : null) });
   acacia(b, W * 0.82, fg[Math.round(W * 0.82)] + 2, 40, STY.savanna, 1100);
   // a small group walking on two legs

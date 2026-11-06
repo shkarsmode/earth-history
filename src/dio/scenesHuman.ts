@@ -115,7 +115,7 @@ export function farm(b: PixBuf, t: number, c: Ctx) {
     if (i % 3 === 0) for (let p = 0; p < 30; p++) { const ph = (t * 0.25 + hash(p + i * 9)) % 1; b.set(Math.round(x + 4 + ph * 14 + Math.sin(ph * 6 + p) * 2), Math.round(by - h - 2 - ph * 30), ph < 0.5 ? hex('#d8d8d0') : hex('#b8c0c8')); }
   }
   // wheat field foreground
-  const fg = ridge(b, { base: H * 0.78, amp: 3, freq: 0.01, seed: 133, fill: hex('#b08a3a'), edge: hex('#d0a84a') });
+  const fg = ridge(b, { base: H * 0.72, amp: 3, freq: 0.01, seed: 133, fill: hex('#b08a3a'), edge: hex('#d0a84a') });
   for (let x = 0; x < W; x++) for (let k = 0; k < 3; k++) {
     if (hash(x * 1.7 + k * 0.3) > 0.85) continue;
     const gy = fg[x] + 4 + k * 12 + Math.floor(hash(x + k * 5) * 10);
@@ -123,8 +123,8 @@ export function farm(b: PixBuf, t: number, c: Ctx) {
     const sw = Math.sin(t * 1.4 + x * 0.08) * 1.5;
     for (let y = 0; y < h; y++) b.set(Math.round(x + sw * (y / h)), gy - y, y > h - 3 ? hex('#f0d070') : hex('#c8a040'));
   }
-  drawSprite(b, 'farmer', W * 0.3, fg[Math.round(W * 0.3)] + 14, t * 1.2);
-  drawSprite(b, 'farmer', W * 0.56, fg[Math.round(W * 0.56)] + 20, t * 1.2 + 0.5, { flip: true });
+  drawSprite(b, 'farmer', W * 0.3, fg[Math.round(W * 0.3)] + 12, t * 1.2);
+  drawSprite(b, 'farmer', W * 0.56, fg[Math.round(W * 0.56)] + 16, t * 1.2 + 0.5, { flip: true });
   for (let i = 0; i < 4; i++) drawSprite(b, 'goat', W * 0.7 + i * 14 + Math.sin(t * 0.3 + i) * 3, hills[Math.round(W * 0.7)] + 18 + (i % 2) * 3, t + i, { flip: i % 2 === 0 });
   drawSprite(b, 'cow', W * 0.18, hills[Math.round(W * 0.18)] + 16, t * 0.6);
 }
@@ -170,7 +170,7 @@ export function ziggurat(b: PixBuf, t: number, c: Ctx) {
   drawSprite(b, 'reedboat', wrapX(W * 0.8 - t * 4, W + 40) - 20, Math.round(H * 0.66), t, { flip: true });
   const bank = ridge(b, { base: H * 0.8, amp: 3, freq: 0.01, seed: 143, fill: hex('#a89060'), edge: hex('#c0a874') });
   for (let i = 0; i < 9; i++) palm(b, hash(i * 3.7 + 1) * W, bank[Math.round(clamp(hash(i * 3.7 + 1) * W, 0, W - 1))] + 2, 36 + hash(i) * 22, STY.tropic, i + 1200, Math.sin(t * 0.5) * 1.2);
-  for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', wrapX(W * 0.4 + i * 22 + t * 4, W + 30) - 15, H - 6, t + i * 0.3);
+  for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', wrapX(W * 0.4 + i * 22 + t * 4, W + 30) - 15, Math.round(H * 0.79), t + i * 0.3);
   // a scribe's clay tablet in the corner: cuneiform wedges
   const px = W - 58, py = Math.round(H * 0.6);
   b.frame(px, py, 44, 32, hex('#b89a70'), hex('#7a5e40'));
@@ -223,6 +223,9 @@ export function industry(b: PixBuf, t: number, c: Ctx) {
   const W = b.w, H = b.h, hy = Math.round(H * 0.66);
   skyGradient(b, [[0, hex('#3a3a46')], [0.5, hex('#6a5e5a')], [1, hex('#c09070')]], 0, hy);
   sunDisc(b, W * 0.7, H * 0.3, 10, hex('#f8d8a8'), hex('#e0a878'), hex('#a87a62'), 2);
+  // yards and canals below the skyline
+  b.rect(0, hy, W, H - hy, hex('#2e2a2e'));
+  for (let y = hy + 2; y < H; y += 4) for (let x = (y * 7) % 9; x < W; x += 9) b.set(x, y, hex('#3a3436'));
   // far factories (silhouettes) with chimneys
   for (let i = 0; i < 14; i++) {
     const x = hash(i * 3.1) * W, w = 26 + hash(i) * 30, h = 18 + hash(i * 2) * 20;
@@ -253,7 +256,7 @@ export function industry(b: PixBuf, t: number, c: Ctx) {
     for (let k = 0; k < w; k += 3) if ((k / 3) % 2) b.set(Math.round(x + k), Math.round(hy + 18 - h), hex('#5a2a20'));
   }
   // railway viaduct with a steam train: piers every 28 px, arches in between
-  const vy = Math.round(H * 0.74);
+  const vy = Math.round(H * 0.62);
   for (let x = 0; x < W; x++) {
     const k = ((x % 28) + 28) % 28;
     const arch = k >= 6 ? Math.sqrt(Math.max(0, 1 - Math.pow((k - 17) / 11, 2))) * 14 : 0;
@@ -268,10 +271,11 @@ export function industry(b: PixBuf, t: number, c: Ctx) {
   drawSprite(b, 'wagon', tx - 64, vy, t);
   for (let p = 0; p < 50; p++) { const ph = (t * 1.2 + hash(p * 3.1)) % 1; const x = tx + 14 - ph * 40, y = vy - 18 - ph * 22 + Math.sin(p) * 2; const r = 1 + ph * 4; ellipse(b, x, y, r, r * 0.8, ph < 0.5 ? hex('#e8e4e0') : hex('#b8b0ac')); }
   // street, lamps, workers
-  b.rect(0, H - 14, W, 14, hex('#3a3436'));
-  for (let x = 0; x < W; x += 4) b.set(x + (Math.floor((H - 10) / 2) % 2) * 2, H - 10, hex('#4a4446'));
-  for (let i = 0; i < 5; i++) { const lx = 30 + i * 100; b.vline(lx, H - 40, H - 14, hex('#1e1a1c')); b.rect(lx - 2, H - 44, 5, 4, hex('#ffe08a')); glow(b, lx, H - 42, 10, hex('#ffd060'), 0.35); }
-  for (let i = 0; i < 4; i++) drawSprite(b, 'worker', wrapX(W * 0.1 + i * 70 + t * (8 + i), W + 20) - 10, H - 4, t * 1.5 + i, { flip: i % 2 === 1 });
+  const st = Math.round(H * 0.8);
+  b.rect(0, st, W, H - st, hex('#3a3436'));
+  for (let y = st + 3; y < H; y += 3) for (let x = (y % 2) * 2; x < W; x += 5) b.set(x, y, hex('#4a4446'));
+  for (let i = 0; i < 5; i++) { const lx = 30 + i * 100; b.vline(lx, st - 26, st, hex('#1e1a1c')); b.rect(lx - 2, st - 30, 5, 4, hex('#ffe08a')); glow(b, lx, st - 28, 10, hex('#ffd060'), 0.35); }
+  for (let i = 0; i < 4; i++) drawSprite(b, 'worker', wrapX(W * 0.1 + i * 70 + t * (8 + i), W + 20) - 10, st + 2, t * 1.5 + i, { flip: i % 2 === 1 });
   grade(b, hex('#5a4a3a'), 0.08);
 }
 
