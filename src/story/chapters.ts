@@ -131,7 +131,7 @@ export const CHAPTERS: Chapter[] = [
       [0.5, 'У них нет ни панцирей, ни глаз; многие из этих существ не похожи ни на кого из ныне живущих.'],
     ],
     cam: [{ u: 0, rh: 0.4, lat: -20, lon: 330, phase: 50, tilt: 20 }, { u: 1, rh: 0.4, lat: -30, lon: 370, phase: 50, tilt: 20 }],
-    dio: { id: 'ediacara', a: 0.4, b: 1.0 },
+    dio: { id: 'ediacara', a: 0.55, b: 1.0 },
   },
   {
     id: 'cambrian', title: 'Кембрийский взрыв', eon: 'paleozoic', y0: Ma(539), y1: Ma(485), dur: 24,
@@ -144,12 +144,13 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     id: 'land', title: 'Жизнь выходит на сушу', eon: 'paleozoic', y0: Ma(485), y1: Ma(359), dur: 26,
+    ykeys: [[0, Ma(485)], [0.45, Ma(420)], [0.72, Ma(383)], [1, Ma(359)]],
     subs: [
       [0.02, 'Около 470 млн лет назад первые растения — родственники мхов — выходят на сушу. За ними следуют членистоногие.'],
-      [0.45, 'В девоне вырастают первые леса, а рыбы вроде тиктаалика (375 млн лет назад) учатся опираться на плавники.'],
+      [0.55, 'В девоне вырастают первые леса, а рыбы вроде тиктаалика (375 млн лет назад) учатся опираться на плавники.'],
     ],
     cam: [{ u: 0, rh: 0.4, lat: -20, lon: 40, phase: 50, tilt: 20 }, { u: 1, rh: 0.4, lat: -10, lon: 90, phase: 50, tilt: 20 }],
-    dio: { id: 'devonian', a: 0.45, b: 1.0 },
+    dio: { id: 'devonian', a: 0.72, b: 1.0 },
   },
   {
     id: 'carbon', title: 'Каменноугольный лес', eon: 'paleozoic', y0: Ma(359), y1: Ma(299), dur: 24,
@@ -197,12 +198,13 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     id: 'cretaceous', title: 'Меловой период', eon: 'mesozoic', y0: Ma(145), y1: Ma(66.2), dur: 24,
+    ykeys: [[0, Ma(145)], [0.45, Ma(100)], [0.68, Ma(72)], [1, Ma(66.2)]], // linger in the last few million years (T. rex 68–66 Ma)
     subs: [
       [0.02, 'Тепло: полярных шапок нет, уровень моря на 100–250 м выше нынешнего. Появляются цветковые растения.'],
-      [0.45, 'Индия отделяется от Мадагаскара и плывёт на север. В конце мела живут тираннозавр и трицератопс.'],
+      [0.5, 'Индия отделяется от Мадагаскара и плывёт на север. В конце мела живут тираннозавр и трицератопс.'],
     ],
     cam: [{ u: 0, rh: 0.4, lat: 0, lon: 40, phase: 45, tilt: 20 }, { u: 1, rh: 0.4, lat: 10, lon: -60, phase: 45, tilt: 20 }],
-    dio: { id: 'cretaceous', a: 0.5, b: 1.0 },
+    dio: { id: 'cretaceous', a: 0.7, b: 1.0 },
   },
   {
     id: 'chicxulub', title: 'Чиксулуб', eon: 'mesozoic', y0: Ma(66.05), y1: Ma(66.0), dur: 30,
@@ -221,7 +223,7 @@ export const CHAPTERS: Chapter[] = [
       [0.7, 'Предки китов возвращаются в море, по планете расходятся травы и степи.'],
     ],
     cam: [{ u: 0, rh: 0.4, lat: 10, lon: -40, phase: 45, tilt: 20 }, { u: 1, rh: 0.4, lat: 15, lon: 60, phase: 45, tilt: 20 }],
-    dio: { id: 'paleogene', a: 0.55, b: 0.95 },
+    dio: { id: 'paleogene', a: 0.18, b: 0.42 },
   },
   {
     id: 'hominins', title: 'Предки человека', eon: 'cenozoic', y0: Ma(7), y1: Ma(2.58), dur: 22,
@@ -230,7 +232,7 @@ export const CHAPTERS: Chapter[] = [
       [0.45, 'Австралопитеки ходят на двух ногах (Люси, 3,2 млн лет назад); 3,3 млн лет назад появляются первые каменные орудия.'],
     ],
     cam: [{ u: 0, rh: 0.42, lat: 5, lon: 25, phase: 45, tilt: 20 }, { u: 1, rh: 0.5, lat: 0, lon: 36, phase: 45, tilt: 20 }],
-    dio: { id: 'savanna', a: 0.4, b: 1.0 },
+    dio: { id: 'savanna', a: 0.6, b: 1.0 },
   },
   {
     id: 'iceages', title: 'Ледниковые периоды', eon: 'cenozoic', y0: Ma(2.58), y1: ka(300), dur: 22,
@@ -293,7 +295,7 @@ export const CHAPTERS: Chapter[] = [
       [0.5, 'Коперник, Галилей и Ньютон: Земля вращается вокруг Солнца, а планетами правит тяготение.'],
     ],
     cam: [{ u: 0, rh: 0.42, lat: 22, lon: -20, phase: 50, tilt: 20 }, { u: 0.5, rh: 0.36, lat: 0, lon: -50, phase: 50, tilt: 20 }, { u: 1, rh: 0.36, lat: -5, lon: -110, phase: 55, tilt: 20 }],
-    dio: { id: 'voyage', a: 0.55, b: 1.0 },
+    dio: { id: 'voyage', a: 0.35, b: 0.65 },
   },
   {
     id: 'industry', title: 'Промышленная революция', eon: 'history', y0: 1760, y1: 1880, dur: 20,
@@ -302,7 +304,7 @@ export const CHAPTERS: Chapter[] = [
       [0.5, 'Около 1804 года людей становится миллиард. CO₂ в воздухе начинает расти с 280 ppm.'],
     ],
     cam: [{ u: 0, rh: 0.62, lat: 48, lon: -8, phase: 70, tilt: 20 }, { u: 1, rh: 0.62, lat: 50, lon: 12, phase: 108, tilt: 20 }],
-    dio: { id: 'industry', a: 0.3, b: 1.0 },
+    dio: { id: 'industry', a: 0.55, b: 1.0 },
   },
   {
     id: 'electric', title: 'Электричество', eon: 'history', y0: 1880, y1: 1945, dur: 20,
