@@ -237,7 +237,7 @@ export function stromatolites(b: PixBuf, t: number, c: Ctx) {
 // ============ Snowball Earth ============
 export function snowball(b: PixBuf, t: number, c: Ctx) {
   const W = b.w, H = b.h, hy = Math.round(H * 0.55);
-  skyGradient(b, [[0, hex('#6a8eb8')], [0.5, hex('#9cbcda')], [1, hex('#e6f2fa')]], 0, hy);
+  skyGradient(b, [[0, hex('#6a8eb8')], [0.5, hex('#9cbcda')], [1, hex('#e6f2fa')]], 0, hy + 8); // reaches below the lowest crest
   // pale Sun with sun dogs (ice-crystal halo)
   const sx = W * 0.35, sy = hy - 40;
   sunDisc(b, sx, sy, 5, hex('#ffffff'), hex('#f4fbff'), hex('#cfe4f4'), 3);

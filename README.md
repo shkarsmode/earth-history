@@ -5,6 +5,16 @@
 
 **Смотреть:** https://earth-history-bice.vercel.app
 
+<p>
+<img src="docs/screens/01-theia.png" width="49%"> <img src="docs/screens/03-magma.png" width="49%">
+<img src="docs/screens/04-archean.png" width="49%"> <img src="docs/screens/05-snowball.png" width="49%">
+<img src="docs/screens/06-cambrian.png" width="49%"> <img src="docs/screens/07-carbon.png" width="49%">
+<img src="docs/screens/08-pangaea.png" width="49%"> <img src="docs/screens/09-jurassic.png" width="49%">
+<img src="docs/screens/10-chicxulub.png" width="49%"> <img src="docs/screens/11-iceage.png" width="49%">
+<img src="docs/screens/12-cities.png" width="49%"> <img src="docs/screens/13-earthrise.png" width="49%">
+<img src="docs/screens/14-city2026.png" width="49%"> <img src="docs/screens/15-future.png" width="49%">
+</p>
+
 ```bash
 npm install
 npm run dev        # http://127.0.0.1:5317
@@ -34,7 +44,7 @@ npm run dev        # http://127.0.0.1:5317
   облака с циклонами, атмосфера, огни городов по регионам, удары, траппы.
 - **События** (`src/planet/events.ts`) — частицы диска обломков после удара Тейи и сборка Луны,
   метеориты, астероид Чикшулуб и выбросы, спутники, траектория «Аполлона», интернет-дуги, расселение людей.
-- **Диорамы** (`src/dio`) — 21 сцена на поверхности, нарисованная программно на CPU прямо в пиксельный буфер
+- **Диорамы** (`src/dio`) — 22 сцены на поверхности, нарисованная программно на CPU прямо в пиксельный буфер
   (параллакс, отражения в воде, частицы, процедурные растения и техника, спрайты существ). Каждая сцена
   показывается только в своё время: тираннозавр — в последние миллионы лет мела, паровоз — после 1825 года.
 - **Карта на глобусе** (`src/hud/geo.ts`) — подписи городов с историческими названиями (Ханбалык → Пекин,

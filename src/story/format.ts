@@ -23,7 +23,8 @@ export function agoLabel(y: number): string {
 
 export function yearLabel(y: number): string {
   if (NOW - y >= 12000) return agoLabel(y);
-  const yr = Math.round(y);
+  // y is continuous time (1957.76 = October 1957), so a CE date shows the calendar year it falls in
+  const yr = y >= 1 ? Math.floor(y) : Math.round(y);
   if (yr <= 0) return `${fmtNum(1 - yr)} г. до н. э.`;
   if (yr < 1000) return `${yr} г. н. э.`;
   return `${yr} г.`;
