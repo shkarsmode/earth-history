@@ -177,6 +177,47 @@ export function ziggurat(b: PixBuf, t: number, c: Ctx) {
   for (let r = 0; r < 5; r++) for (let k = 0; k < 6; k++) if (hash(r * 7 + k) > 0.25) { const x = px + 5 + k * 6, yy = py + 5 + r * 5; b.set(x, yy, hex('#5a4028')); b.set(x + 1, yy, hex('#5a4028')); b.set(x, yy + 1, hex('#7a5e40')); }
 }
 
+// ============ Age of sail: a caravel at sunset ============
+export function voyage(b: PixBuf, t: number, c: Ctx) {
+  const W = b.w, H = b.h, hy = Math.round(H * 0.58);
+  skyGradient(b, [[0, hex('#24264e')], [0.45, hex('#7a4a7a')], [0.75, hex('#e0786a')], [1, hex('#ffc890')]], 0, hy);
+  stars(b, 40, 71, hy * 0.3, c.amb, 0.5);
+  // long lit cloud streaks
+  for (let k = 0; k < 6; k++) {
+    const y = Math.round(H * (0.12 + k * 0.07)), x0 = (hash(k * 3.1) * W + t * (2 + k)) % (W + 160) - 80, len = 80 + hash(k) * 120;
+    for (let x = Math.round(x0); x < x0 + len; x++) {
+      const f = (x - x0) / len;
+      const th = Math.round(2 * Math.sin(f * Math.PI));
+      for (let j = 0; j <= th; j++) b.set(x, y + j, j === 0 ? hex('#ffb0a0') : hex('#b0607a'));
+    }
+  }
+  const sx = W * 0.62;
+  sunDisc(b, sx, hy - 4, 12, hex('#fff2c8'), hex('#ffd090'), hex('#f09070'), 3);
+  b.rect(0, hy - 2, W, 2, hex('#a85a6a'));
+  // distant headland
+  ridge(b, { base: hy - 1, amp: 2, freq: 0.02, seed: 171, fill: hex('#4a2e4a'), edge: hex('#6a3e5a'), depth: 14,
+    peaks: (x) => { const d = (x - W * 0.12) / 60; return d > -1 && d < 1 ? 10 * (1 - d * d) : 0; } });
+  water(b, hy, hex('#2a3a6a'), 0.5, t, { ripple: 1 });
+  // glitter path under the sun
+  for (let y = hy + 1; y < H; y++) {
+    const spread = 3 + (y - hy) * 0.35;
+    for (let k = 0; k < 3; k++) {
+      const x = Math.round(sx + (hash(y * 7.3 + k + Math.floor(t * 6)) - 0.5) * spread * 2);
+      if (hash(y * 1.3 + k * 9 + Math.floor(t * 5)) > 0.45) b.hline(x, x + 1 + Math.floor((y - hy) / 30), y, (y - hy) % 3 ? hex('#ffd890') : hex('#fff0c0'));
+    }
+  }
+  // wave crests
+  for (let y = hy + 4; y < H; y += 5) for (let x = 0; x < W; x++) if (tn2(x * 0.05 + t * 0.4 + y, y * 0.3) > 0.72) b.set(x, y, hex('#7a7aa8'));
+  // the caravel, bobbing on the swell
+  const cx = W * 0.4 + Math.sin(t * 0.08) * 20, cy = hy + 34 + Math.sin(t * 1.3) * 1.5;
+  if (!drawSprite(b, 'caravel', cx, cy, t)) {
+    poly(b, [[cx - 18, cy - 6], [cx + 18, cy - 6], [cx + 13, cy], [cx - 13, cy]], hex('#3a2418'));
+    b.vline(Math.round(cx), Math.round(cy - 34), Math.round(cy - 6), hex('#3a2418'));
+    poly(b, [[cx - 12, cy - 30], [cx + 12, cy - 30], [cx + 10, cy - 10], [cx - 10, cy - 10]], hex('#e8d8c0'));
+  }
+  for (let i = 0; i < 5; i++) drawSprite(b, 'bird', wrapX(W * 0.3 + i * 40 + t * (10 + i * 2), W + 20) - 10, H * (0.25 + (i % 3) * 0.05) + Math.sin(t * 2 + i) * 3, t * 2 + i, { sil: hex('#2a1a2e') });
+}
+
 // ============ Industrial revolution ============
 export function industry(b: PixBuf, t: number, c: Ctx) {
   const W = b.w, H = b.h, hy = Math.round(H * 0.66);

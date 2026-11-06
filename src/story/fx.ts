@@ -119,11 +119,13 @@ export function applyFx(w: Where, year: number, s: PlanetState, shot: Shot, ev: 
       break;
     }
     case 'permian': {
-      ev.traps = sramp(u, 0.03, 0.25) * (1 - 0.4 * sramp(u, 0.85, 1));
-      s.oceanDeep = mix3(s.oceanDeep, [0.12, 0.22, 0.2], sramp(u, 0.3, 0.7));
-      s.oceanShallow = mix3(s.oceanShallow, [0.3, 0.45, 0.32], sramp(u, 0.3, 0.7));
-      s.atmoColor = mix3(s.atmoColor, [0.85, 0.55, 0.35], sramp(u, 0.2, 0.6));
-      s.veg *= 1 - 0.6 * sramp(u, 0.4, 0.9);
+      // eruption builds up, the dying world, then a slow fade so the Triassic starts without a jump
+      const fade = 1 - sramp(u, 0.84, 1);
+      ev.traps = sramp(u, 0.03, 0.25) * fade;
+      s.oceanDeep = mix3(s.oceanDeep, [0.12, 0.22, 0.2], sramp(u, 0.3, 0.6) * fade);
+      s.oceanShallow = mix3(s.oceanShallow, [0.3, 0.45, 0.32], sramp(u, 0.3, 0.6) * fade);
+      s.atmoColor = mix3(s.atmoColor, [0.85, 0.55, 0.35], sramp(u, 0.2, 0.5) * fade);
+      s.veg *= 1 - 0.6 * sramp(u, 0.4, 0.8);
       break;
     }
     case 'chicxulub': {

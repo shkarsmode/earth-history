@@ -291,6 +291,7 @@ export const CHAPTERS: Chapter[] = [
       [0.5, 'Коперник, Галилей и Ньютон: Земля вращается вокруг Солнца, а планетами правит тяготение.'],
     ],
     cam: [{ u: 0, rh: 0.42, lat: 22, lon: -20, phase: 50, tilt: 20 }, { u: 0.5, rh: 0.36, lat: 0, lon: -50, phase: 50, tilt: 20 }, { u: 1, rh: 0.36, lat: -5, lon: -110, phase: 55, tilt: 20 }],
+    dio: { id: 'voyage', a: 0.55, b: 1.0 },
   },
   {
     id: 'industry', title: 'Промышленная революция', eon: 'history', y0: 1760, y1: 1880, dur: 20,
