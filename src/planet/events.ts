@@ -10,7 +10,7 @@ import { dir } from '../story/plates';
 export interface Events {
   theia: { on: boolean; pos: THREE.Vector3; r: number; heat: number };
   debris: { on: boolean; mode: number; t: number; accrete: number; fade: number };
-  moon: { on: boolean; pos: THREE.Vector3; scale: number; lava: number };
+  moon: { on: boolean; pos: THREE.Vector3; scale: number; lava: number; camRel?: [number, number] };
   disk: { n: THREE.Vector3; e1: THREE.Vector3; e2: THREE.Vector3 };
   impacts: { dirW: THREE.Vector3; age: number; crater: number; shock: number; glow: number; flash: number }[];
   meteors: number; // shower intensity 0..1

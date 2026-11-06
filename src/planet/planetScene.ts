@@ -251,7 +251,7 @@ export class PlanetScene {
     cam.up.set(0, 1, 0);
     cam.lookAt(0, 0, 0);
     cam.setViewOffset(this.W, this.H, (-shot.ox * this.W) / 2, (shot.oy * this.H) / 2, this.W, this.H);
-    cam.near = Math.max(0.005, (dist - 1.1) * 0.5);
+    cam.near = Math.max(0.005, Math.min((dist - 1.1) * 0.5, 0.08));
     cam.updateProjectionMatrix();
     cam.updateMatrixWorld();
 
@@ -355,6 +355,7 @@ export class PlanetScene {
     mu.uGlow.value = 0;
     this.moon.scale.setScalar(0.2727);
     if (ev.moon.on) {
+      if (ev.moon.camRel) ev.moon.pos.set(0, ev.moon.camRel[0], dist - ev.moon.camRel[1]);
       this.moon.position.copy(ev.moon.pos);
       this.moon.lookAt(0, 0, 0);
       this.moon.scale.setScalar(Math.max(0.0001, ev.moon.scale));

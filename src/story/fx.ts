@@ -164,7 +164,20 @@ export function applyFx(w: Where, year: number, s: PlanetState, shot: Shot, ev: 
       break;
     }
     case 'space': {
-      ev.apollo = year >= 1968.9 ? clamp((year - 1968.9) / 0.9) : -1;
+      ev.apollo = u >= 0.96 ? 1 : -1;
+      if (u >= 0.74 && u < 0.8) {
+        // "Earthrise" (Apollo 8, 24 Dec 1968): from lunar orbit with a long lens, the Moon's limb in front
+        const dist = 58.6;
+        shot.fov = 7;
+        shot.rh = Math.tan(Math.asin(1 / dist)) / (2 * Math.tan((shot.fov * Math.PI) / 360));
+        shot.ox = 0; shot.oy = 0.18;
+        shot.phase = 82; shot.tilt = 4; shot.lat = -12; shot.lon = 5 + (u - 0.74) * 80;
+        ev.moon.on = true;
+        ev.moon.camRel = [-0.2727 - 0.018, 0.9]; // just below the line of sight, 0.9 Earth radii ahead of the camera
+        ev.moon.scale = 0.2727;
+        ev.moon.lava = 0;
+        ev.sats = 0;
+      }
       break;
     }
     case 'internet': {

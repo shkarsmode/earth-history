@@ -133,6 +133,14 @@ void main() {
   float bowl2 = step(v2.x, 0.25) * step(0.6, v2.z);
   alb *= 1.0 - uCraters * (0.18 * bowl + 0.12 * bowl2) ;
   alb += uCraters * 0.12 * rim;
+  // small craters for close-ups (rim lit toward the Sun, bowl shadowed away from it)
+  vec3 v3 = voronoi3(n * 120.0 + 11.0);
+  if (v3.z > 0.55 && v3.x < 0.42) {
+    float side = dot(normalize(uSunDir), N);
+    float inner = smoothstep(0.42, 0.25, v3.x);
+    alb *= 1.0 - uCraters * 0.22 * inner * (0.6 + 0.4 * side);
+    alb += uCraters * 0.1 * (1.0 - inner) * step(0.3, v3.x);
+  }
   // maria
   float m = mareMask(n) * uMaria;
   alb = mix(alb, vec3(0.3, 0.31, 0.33) + 0.04 * g, step(th, m * 1.4) * step(0.15, m));

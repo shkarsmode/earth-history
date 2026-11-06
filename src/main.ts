@@ -124,7 +124,9 @@ async function boot() {
       const tA = dio.a * where.ch.dur, tB = dio.b * where.ch.dur;
       const tl = where.tl;
       mix = smooth((tl - tA) / 1.2) * (dio.b >= 1 ? 1 - smooth((tl - (where.ch.dur - 1.0)) / 1.0) : 1 - smooth((tl - (tB - 1.2)) / 1.2));
-      if (tl < tA + 1.2) shot.rh *= 1 + 1.8 * smooth((tl - (tA - 2.4)) / 2.4);
+      const special = shot.fov < 12; // long-lens shots (Earthrise) keep their framing
+      if (special) { /* no dive zoom */ }
+      else if (tl < tA + 1.2) shot.rh *= 1 + 1.8 * smooth((tl - (tA - 2.4)) / 2.4);
       else if (dio.b < 1 && tl > tB - 1.2) shot.rh *= 1 + 1.8 * (1 - smooth((tl - (tB - 1.2)) / 2.4));
       // dioramas are drawn on the CPU: cap them at 30 fps (pixel art does not need more)
       if (mix > 0 && (forceDio || Math.abs(director.amb - lastDioAmb) >= 1 / 30 - 1e-4)) {
