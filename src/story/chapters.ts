@@ -315,7 +315,7 @@ export const CHAPTERS: Chapter[] = [
       [0.02, '4 октября 1957 — первый искусственный спутник. 12 апреля 1961 — Юрий Гагарин, первый человек в космосе.'],
       [0.5, '20 июля 1969 — Нил Армстронг и Базз Олдрин ступают на Луну.'],
     ],
-    cam: [{ u: 0, rh: 0.34, lat: 30, lon: 40, phase: 70, tilt: 20, moonAz: 8, moonEl: 3 }, { u: 1, rh: 0.3, lat: 28, lon: -70, phase: 70, tilt: 20, moonAz: 8, moonEl: 3 }],
+    cam: [{ u: 0, rh: 0.34, lat: 30, lon: 40, phase: 70, tilt: 20, moonAz: 17, moonEl: 5 }, { u: 0.7, rh: 0.26, lat: 28, lon: -70, phase: 70, tilt: 20, moonAz: 17, moonEl: 5, ox: -0.25 }, { u: 1, rh: 0.26, lat: 28, lon: -90, ox: -0.25 }],
     dio: { id: 'launch', a: 0.36, b: 0.6 },
   },
   {

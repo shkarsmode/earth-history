@@ -11,6 +11,8 @@ import { planetAt } from './story/planetState';
 import { hex } from './gfx/pixbuf';
 import { emptyEvents } from './planet/events';
 import { applyFx } from './story/fx';
+import { SCENES } from './dio';
+import { smooth } from './core/hash';
 
 THREE.ColorManagement.enabled = false;
 
@@ -96,13 +98,30 @@ async function boot() {
 
   let mapMode: number | null = null;
 
-  function renderFrame() {
+  let lastDioAmb = -1;
+  function renderFrame(forceDio = true) {
     if (display.layout()) planet.setSize(display.w, display.h);
     const year = director.year();
     const s = planetAt(mapMode !== null ? 2026 - mapMode * 1e6 : year);
     const shot = director.shot();
     const ev = emptyEvents();
-    if (mapMode === null) applyFx(director.locate(), year, s, shot, ev, director.amb);
+    const where = director.locate();
+    if (mapMode === null) applyFx(where, year, s, shot, ev, director.amb);
+    // surface diorama window: dither-dissolve, with a "dive" zoom into the planet before it
+    let mix = 0;
+    const dio = where.ch.dio;
+    if (mapMode === null && dio && SCENES[dio.id]) {
+      const tA = dio.a * where.ch.dur, tB = dio.b * where.ch.dur;
+      const tl = where.tl;
+      mix = smooth((tl - tA) / 1.2) * (dio.b >= 1 ? 1 - smooth((tl - (where.ch.dur - 1.0)) / 1.0) : 1 - smooth((tl - (tB - 1.2)) / 1.2));
+      if (tl < tA + 1.2) shot.rh *= 1 + 1.8 * smooth((tl - (tA - 2.4)) / 2.4);
+      else if (dio.b < 1 && tl > tB - 1.2) shot.rh *= 1 + 1.8 * (1 - smooth((tl - (tB - 1.2)) / 2.4));
+      // dioramas are drawn on the CPU: cap them at 30 fps (pixel art does not need more)
+      if (mix > 0 && (forceDio || Math.abs(director.amb - lastDioAmb) >= 1 / 30 - 1e-4)) {
+        SCENES[dio.id](display.dio, Math.max(0, tl - tA + 1.2), { amb: director.amb, year, u: where.u });
+        lastDioAmb = director.amb;
+      }
+    }
     planet.update(s, shot, mapMode !== null ? 2026 - mapMode * 1e6 : year, director.amb, ev);
     if (mapMode !== null) {
       planet.earthMat.uniforms.uFlat.value = 1;
@@ -120,7 +139,7 @@ async function boot() {
     }
     display.renderScene(planet.scene, planet.camera);
     hud.draw(display.overlay, director, performance.now() / 1000);
-    display.present(0, ev.flash, ev.flashColor);
+    display.present(mix, ev.flash, ev.flashColor);
   }
 
   // ---------- input ----------
@@ -165,7 +184,7 @@ async function boot() {
   function loop(now: number) {
     director.tick((now - last) / 1000);
     last = now;
-    renderFrame();
+    renderFrame(false);
     requestAnimationFrame(loop);
   }
   document.getElementById('boot')?.remove();
@@ -173,7 +192,7 @@ async function boot() {
 
   // ---------- debug hook (works even when rAF is throttled: set time, render, snapshot) ----------
   const api = {
-    director, display, planet, hud,
+    director, display, planet, hud, scenes: SCENES,
     /** jump to chapter (index or id) at local progress u, pause, and render */
     at(ch: number | string, u = 0.5, amb?: number) {
       const ci = typeof ch === 'number' ? ch : director.chapters.findIndex((c) => c.id === ch);

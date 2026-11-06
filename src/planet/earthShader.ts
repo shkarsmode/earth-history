@@ -295,13 +295,17 @@ void main() {
   float trapsGlow = 0.0;
   if (uTraps.w > 0.0 && abs(ps.y - uTrapsPlate) < 0.5) {
     float d = acos(clamp(dot(q, normalize(uTraps.xyz)), -1.0, 1.0));
-    float region = 1.0 - smoothstep(0.08, 0.2, d + 0.04 * mid);
+    float region = 1.0 - smoothstep(0.12, 0.3, d + 0.05 * mid);
     if (region > 0.0) {
-      vec3 vor = voronoi3(q * 70.0 + vec3(uTime * 0.05));
-      float fiss = 1.0 - smoothstep(0.0, 0.07, vor.y - vor.x);
+      vec3 vor = voronoi3(q * 45.0 + vec3(uTime * 0.05));
+      float fiss = 1.0 - smoothstep(0.0, 0.09, vor.y - vor.x);
+      float core = 1.0 - smoothstep(0.0, 0.18, d);
       albedo = mix(albedo, rgb(30, 22, 22), region * uTraps.w);
-      trapsGlow = region * uTraps.w * (fiss * (0.6 + 0.4 * sin(uTime * 3.0 + vor.z * 20.0)) + 0.15);
+      trapsGlow = region * uTraps.w * (fiss * (0.65 + 0.35 * sin(uTime * 3.0 + vor.z * 20.0)) + 0.2 + 0.5 * core * step(0.55, vor.z));
     }
+    // ash veil spreading from the eruption
+    float veil = (1.0 - smoothstep(0.2, 0.9, d)) * uTraps.w * 0.6;
+    albedo = mix(albedo, rgb(70, 52, 44), step(th, veil * (0.6 + 0.4 * mid)));
   }
 
   // ---------------- impacts: craters, fire rings ----------------
@@ -336,8 +340,8 @@ void main() {
   // ocean sun glint (quantized blob)
   if (spec > 0.0 && uOcean > 0.0 && uFlat < 0.5) {
     vec3 Hh = normalize(L + V);
-    float g = pow(max(dot(N, Hh), 0.0), 90.0) * step(0.0, ndl);
-    float gq = qdither(clamp(g * 1.6, 0.0, 1.0), 3.0, th);
+    float g = pow(max(dot(N, Hh), 0.0), 260.0) * step(0.0, ndl);
+    float gq = qband(clamp(g * 2.2, 0.0, 1.0), 3.0, th, 0.5);
     col = mix(col, mix(uOceanShallow * 1.6, vec3(1.0, 0.97, 0.88), gq), gq * 0.95);
   }
 

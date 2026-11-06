@@ -4,6 +4,7 @@ import type { PixelFont } from '../gfx/font';
 import { Director, SPEEDS } from '../core/director';
 import { EONS } from '../story/chapters';
 import { yearLabel } from '../story/format';
+import { liveStats } from '../story/stats';
 import { clamp } from '../core/hash';
 
 const C = {
@@ -80,9 +81,9 @@ export class Hud {
     f.drawOutlined(buf, dateText.toUpperCase(), 8, 15, dateCol, C.shadow);
     f.drawOutlined(buf, ch.title.toUpperCase(), 8, 27, C.title, C.shadow);
     f.drawOutlined(buf, (ch.forecast ? 'ПРОГНОЗ · СЦЕНАРИЙ' : eon.name.toUpperCase()), 8, 39, ch.forecast ? C.forecast : eonCol, C.shadow);
-    if (ch.stats) {
+    {
       let y = 53;
-      for (const s of ch.stats) { f.drawOutlined(buf, s, 8, y, C.dim, C.shadow); y += 11; }
+      for (const s of [...(ch.stats ?? []), ...liveStats(year)]) { f.drawOutlined(buf, s, 8, y, ch.forecast ? C.forecast : C.dim, C.shadow); y += 11; }
     }
     if (ch.clock) {
       const c = ch.clock(where.u);
@@ -123,6 +124,14 @@ export class Hud {
       let y = H - barH - 8 - (lines.length - 1) * lh;
       const fade = sub.left < 0.35 ? sub.left / 0.35 : 1;
       if (fade > 0.05) {
+        // soft translucent band behind the subtitle so it reads on snow, flashes and lava alike
+        let wMax = 0;
+        for (const line of lines) wMax = Math.max(wMax, f.measure(line));
+        const bx = Math.round((W - wMax) / 2) - 6, by0 = y - 10, bh = lines.length * lh + 5;
+        for (let yy = by0; yy < by0 + bh; yy++) for (let xx = bx; xx < bx + wMax + 12; xx++) {
+          const edge = Math.min(xx - bx, bx + wMax + 11 - xx, yy - by0, by0 + bh - 1 - yy);
+          buf.blend(xx, yy, C.shadow, edge < 2 ? 0.22 * fade : 0.42 * fade);
+        }
         for (const line of lines) {
           const part = left >= line.length ? line : line.slice(0, Math.max(0, left));
           left -= line.length + 1;
