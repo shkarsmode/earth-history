@@ -29,30 +29,40 @@ function lightShafts(b: PixBuf, x0: number, n: number, c: string, k: number, t: 
 
 // ============ Devonian: the first forests and fish with legs ============
 export function devonian(b: PixBuf, t: number, c: Ctx) {
-  const W = b.w, H = b.h, hy = Math.round(H * 0.6);
-  skyGradient(b, [[0, hex('#3d6eb4')], [0.6, hex('#86b0d8')], [1, hex('#d6e6ee')]], 0, hy);
-  cloud(b, W * 0.25 + t * 1.5, H * 0.16, 70, hex('#ffffff'), hex('#e2ecf4'), hex('#b8cce0'), 3);
-  cloud(b, W * 0.72 + t * 1.0, H * 0.24, 50, hex('#f6fafc'), hex('#dce6f0'), hex('#b0c4d8'), 7);
-  ridge(b, { base: hy - 14, amp: 12, freq: 0.012, seed: 61, fill: hex('#7a9aa6'), edge: hex('#94b2bc') });
-  // Archaeopteris woods on the far shore (misty)
-  const far = ridge(b, { base: hy - 4, amp: 4, freq: 0.03, seed: 62, fill: hex('#5e7a5a'), edge: hex('#6e8a64') });
-  for (let i = 0; i < 18; i++) { const x = hash(i * 2.3) * W; conifer(b, x, far[Math.round(clamp(x, 0, W - 1))] + 1, 26 + hash(i) * 18, silStyle('#56724e'), i); }
-  water(b, hy, hex('#3e6a6a'), 0.4, t, { ripple: 1, sparkle: hex('#e6f4f4'), sparkleN: 30 });
-  // muddy shore with the first low plants
-  const shore = ridge(b, { base: H * 0.72, amp: 7, freq: 0.01, seed: 64, fill: hex('#5e4a32'), edge: hex('#7a6444'),
-    shadeFn: (x, y, d) => (d < 2 ? hex('#6e5a3c') : tn2(x * 0.2, y * 0.3) > 0.7 ? hex('#4e3e2a') : tn2(x * 0.15 + 4, y * 0.2) > 0.72 ? hex('#3e5a2a') : null) });
-  for (let i = 0; i < 70; i++) { // Psilophyton/Rhynia-like forked stems
+  const W = b.w, H = b.h, hy = Math.round(H * 0.56);
+  skyGradient(b, [[0, hex('#2e5a9e')], [0.55, hex('#7aa6d2')], [0.85, hex('#d8e2d6')], [1, hex('#f2e2b8')]], 0, hy);
+  sunDisc(b, W * 0.78, hy - 22, 9, hex('#fffbe8'), hex('#fff0c8'), hex('#f2dcb0'), 3);
+  cloud(b, W * 0.25 + t * 1.5, H * 0.14, 70, hex('#ffffff'), hex('#e2ecf4'), hex('#b8cce0'), 3);
+  cloud(b, W * 0.6 + t * 1.0, H * 0.22, 46, hex('#f6fafc'), hex('#dce6f0'), hex('#b0c4d8'), 7);
+  ridge(b, { base: hy - 12, amp: 12, freq: 0.012, seed: 61, fill: hex('#7a98a8'), edge: hex('#94b0be'), depth: 30 });
+  // Archaeopteris woods on the far shore, the planet's first forests
+  const far = ridge(b, { base: hy - 3, amp: 4, freq: 0.03, seed: 62, fill: hex('#5e7a5a'), edge: hex('#6e8a64') });
+  for (let i = 0; i < 22; i++) { const x = hash(i * 2.3) * W; conifer(b, x, far[Math.round(clamp(x, 0, W - 1))] + 1, 22 + hash(i) * 20, silStyle(i % 2 ? '#56724e' : '#4e6a48'), i); }
+  water(b, hy, hex('#3e6a6a'), 0.4, t, { ripple: 1, sparkle: hex('#fff6e0'), sparkleN: 40 });
+  // morning mist over the lagoon
+  for (let y = hy - 4; y < hy + 8; y++) for (let x = 0; x < W; x++) { const a2 = (1 - Math.abs(y - hy - 2) / 7) * 0.45 * tn2(x * 0.03 + t * 0.15, y * 0.2); if (a2 > bayer4(x, y)) b.set(x, y, hex('#dfe8e0')); }
+  // muddy shore carpeted with the first low plants
+  const shore = ridge(b, { base: H * 0.72, amp: 7, freq: 0.01, seed: 64, fill: hex('#5e4a32'), edge: hex('#8a7a52'),
+    shadeFn: (x, y, d) => (d < 2 ? hex('#7a6a48') : tn2(x * 0.2, y * 0.3) > 0.62 ? hex('#3e5a2a') : tn2(x * 0.15 + 4, y * 0.2) > 0.7 ? hex('#4e6a32') : null) });
+  // wet sand line with lapping foam
+  for (let x = 0; x < W; x++) { const y = shore[x] - 1; if (tn2(x * 0.1, t * 0.6) > 0.55) b.set(x, y, hex('#e8eee0')); }
+  for (let i = 0; i < 110; i++) { // Psilophyton/Rhynia-like forked stems
     const x = hash(i * 1.91) * W;
-    const gy = shore[Math.round(clamp(x, 0, W - 1))] + Math.floor(hash(i * 3.1) * 20);
-    const h = 5 + hash(i * 4.4) * 9;
+    const gy = shore[Math.round(clamp(x, 0, W - 1))] + 2 + Math.floor(hash(i * 3.1) * 26);
+    const h = 5 + hash(i * 4.4) * 10;
     const sw = Math.sin(t * 1.2 + i) * 0.8;
-    for (let y = 0; y < h; y++) b.set(Math.round(x + sw * y / h), gy - y, hex('#5e8a32'));
-    b.set(Math.round(x + sw - 1), Math.round(gy - h), hex('#8aae44')); b.set(Math.round(x + sw + 1), Math.round(gy - h), hex('#8aae44'));
+    for (let y = 0; y < h; y++) b.set(Math.round(x + sw * y / h), gy - y, y < h * 0.5 ? hex('#4e7a2a') : hex('#6a9a34'));
+    b.set(Math.round(x + sw - 1), Math.round(gy - h), hex('#a8c050')); b.set(Math.round(x + sw + 1), Math.round(gy - h), hex('#a8c050'));
+    if (i % 3 === 0) b.set(Math.round(x + sw), Math.round(gy - h - 1), hex('#d8c060')); // sporangia
   }
-  // Tiktaalik at the waterline, a few fish below
-  const tx = W * 0.4 + Math.sin(t * 0.3) * 10;
-  drawSprite(b, 'tiktaalik', tx, shore[Math.round(clamp(tx, 0, W - 1))] + 3, t);
-  for (let i = 0; i < 5; i++) drawSprite(b, 'fish', wrapX(hash(i * 5.5) * W + t * (8 + i * 3), W + 20) - 10, hy + 10 + i * 6, t + i, { tint: hex('#3e6a6a'), tintK: 0.5, flip: i % 2 === 1 });
+  // two young Archaeopteris trees on the near bank
+  conifer(b, W * 0.12, shore[Math.round(W * 0.12)] + 3, 58, STY.devonian, 70);
+  conifer(b, W * 0.9, shore[Math.round(W * 0.9)] + 3, 46, STY.devonian, 71);
+  // Tiktaalik propping itself at the waterline, fish in the shallows
+  const tx = W * 0.45 + Math.sin(t * 0.3) * 8;
+  drawSprite(b, 'tiktaalik', tx, shore[Math.round(clamp(tx, 0, W - 1))] + 2, t);
+  for (let i = 0; i < 6; i++) drawSprite(b, 'fish', wrapX(hash(i * 5.5) * W + t * (8 + i * 3) * (i % 2 ? -1 : 1), W + 20) - 10, hy + 8 + i * 5, t + i, { tint: hex('#3e6a6a'), tintK: 0.45, flip: i % 2 === 1 });
+  drawSprite(b, 'eurypterid', W * 0.7 + Math.sin(t * 0.2) * 10, hy + 26, t, { tint: hex('#3e6a6a'), tintK: 0.35 });
 }
 
 // ============ Carboniferous swamp forest ============
