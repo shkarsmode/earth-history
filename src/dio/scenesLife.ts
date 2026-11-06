@@ -198,17 +198,28 @@ export function cretaceous(b: PixBuf, t: number, c: Ctx) {
 
 // ============ Paleogene: the age of mammals begins ============
 export function paleogene(b: PixBuf, t: number, c: Ctx) {
-  const W = b.w, H = b.h, hy = Math.round(H * 0.55);
-  skyGradient(b, [[0, hex('#5a8ac0')], [0.6, hex('#a8c8d8')], [1, hex('#e0eacc')]], 0, hy);
-  cloud(b, W * 0.5 + t * 1.5, H * 0.12, 90, hex('#ffffff'), hex('#e6eef2'), hex('#bccad6'), 21);
-  ridge(b, { base: hy - 8, amp: 10, freq: 0.012, seed: 101, fill: hex('#6a9a8a'), edge: hex('#80ae9a') });
-  const jungle = ridge(b, { base: hy + 6, amp: 6, freq: 0.04, seed: 102, fill: hex('#2e6a3a'), edge: hex('#3e8044') });
-  for (let i = 0; i < 20; i++) { const x = hash(i * 2.7 + 3) * W; palm(b, x, jungle[Math.round(clamp(x, 0, W - 1))] + 2, 24 + hash(i) * 14, silStyle('#2a5a32'), i + 900); }
-  water(b, Math.round(H * 0.7), hex('#3a6a5a'), 0.45, t, { ripple: 1, sparkle: hex('#f0f6e8'), sparkleN: 20, bottom: Math.round(H * 0.8) });
+  // Eocene hothouse: a steamy rainforest river, the first horses and primates' world
+  const W = b.w, H = b.h, hy = Math.round(H * 0.5);
+  skyGradient(b, [[0, hex('#4a7ab0')], [0.55, hex('#9ac0c8')], [1, hex('#e2e8c0')]], 0, hy);
+  sunDisc(b, W * 0.7, H * 0.16, 9, hex('#fffbe8'), hex('#fff2c0'), hex('#f0e0a8'), 3);
+  cloud(b, W * 0.3 + t * 1.5, H * 0.12, 90, hex('#ffffff'), hex('#e6eef2'), hex('#bccad6'), 21);
+  ridge(b, { base: hy - 6, amp: 10, freq: 0.012, seed: 101, fill: hex('#6a9a8a'), edge: hex('#80ae9a'), depth: 30 });
+  // dense canopy on the far bank, layered: misty, then saturated
+  const far = ridge(b, { base: hy + 2, amp: 7, freq: 0.05, seed: 102, fill: hex('#4e8a62'), edge: hex('#62a070'), depth: 30 });
+  for (let i = 0; i < 26; i++) { const x = hash(i * 2.7 + 3) * W; palm(b, x, far[Math.round(clamp(x, 0, W - 1))] + 3, 18 + hash(i) * 14, silStyle('#3e7a52'), i + 900); }
+  const near = ridge(b, { base: hy + 14, amp: 6, freq: 0.04, seed: 104, fill: hex('#2e6a3a'), edge: hex('#3e8044'), depth: 30 });
+  for (let i = 0; i < 9; i++) { const x = hash(i * 4.3 + 1) * W; broadleaf(b, x, near[Math.round(clamp(x, 0, W - 1))] + 4, 16 + hash(i) * 10, silStyle('#2a5e34'), i + 920); }
+  // humid haze over the river
+  for (let y = hy + 10; y < hy + 24; y++) for (let x = 0; x < W; x++) { const a2 = (1 - Math.abs(y - hy - 17) / 7) * 0.4 * tn2(x * 0.03 + t * 0.12, y * 0.2); if (a2 > bayer4(x, y)) b.set(x, y, hex('#d8e8d0')); }
+  const ry = Math.round(H * 0.62);
+  water(b, ry, hex('#3a6a5a'), 0.42, t, { ripple: 1, sparkle: hex('#f0f6e8'), sparkleN: 24, bottom: Math.round(H * 0.74) });
+  // lily pads and floating leaves
+  for (let i = 0; i < 26; i++) { const x = wrapX(hash(i * 1.7) * W + t * 1.5, W), y = ry + 3 + hash(i * 3.3) * (H * 0.74 - ry - 6); ellipse(b, x, y, 2 + hash(i) * 2, 1, hex('#4e8a3a')); if (i % 5 === 0) b.set(Math.round(x), Math.round(y) - 1, hex('#f0c0d8')); }
   const fg = ridge(b, { base: H * 0.76, amp: 4, freq: 0.012, seed: 103, fill: hex('#4a6a2e'), edge: hex('#628a3a') });
-  for (let i = 0; i < 4; i++) broadleaf(b, hash(i * 9.1 + 4) * W, fg[Math.round(clamp(hash(i * 9.1 + 4) * W, 0, W - 1))] + 3, 30 + hash(i) * 12, STY.tropic, i + 950);
+  for (let i = 0; i < 4; i++) broadleaf(b, hash(i * 9.1 + 4) * W, fg[Math.round(clamp(hash(i * 9.1 + 4) * W, 0, W - 1))] + 3, 30 + hash(i) * 12, STY.tropic, i + 950, i % 2 ? hex('#f6e080') : undefined);
   for (let i = 0; i < 3; i++) palm(b, hash(i * 4.7 + 8) * W, H + 2, 60 + hash(i) * 30, STY.tropic, i + 980, Math.sin(t * 0.6) * 2);
-  for (let i = 0; i < 3; i++) drawSprite(b, 'eohippus', wrapX(W * 0.3 + i * 30 + t * 7, W + 40) - 20, fg[Math.round(clamp(W * 0.3 + i * 30, 0, W - 1))] + 6, t * 1.2 + i);
+  // early horses at the water's edge, a small mammal in the undergrowth, birds
+  for (let i = 0; i < 3; i++) { const x = wrapX(W * 0.3 + i * 30 + t * 6, W + 40) - 20; drawSprite(b, 'eohippus', x, fg[Math.round(clamp(x, 0, W - 1))] + 6, t * 1.2 + i); }
   drawSprite(b, 'smallmammal', W * 0.62 + Math.sin(t) * 6, fg[Math.round(W * 0.62)] + 10, t * 2);
   for (let i = 0; i < 5; i++) drawSprite(b, 'bird', wrapX(t * (20 + i * 5) + i * 90, W + 20) - 10, H * (0.15 + i * 0.04), t * 2 + i);
   grass(b, fg, 0, W, 0.5, 5, [hex('#4e7a2e'), hex('#6a9a3a')], t, 11);
