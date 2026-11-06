@@ -78,6 +78,7 @@ async function boot() {
   const pimg = plates.image as HTMLImageElement;
   const plateInfo = analyzePlates(imagePixels(pimg), pimg.width, pimg.height);
   const planet = new PlanetScene({ plates, day, night, topo }, plateInfo);
+  planet.setSize(display.w, display.h); // the display was laid out before the scene existed
   const director = new Director();
   const hud = new Hud(font);
   const sound = new Soundtrack();
