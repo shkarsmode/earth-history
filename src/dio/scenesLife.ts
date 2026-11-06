@@ -69,7 +69,7 @@ export function carbon(b: PixBuf, t: number, c: Ctx) {
   water(b, wy, hex('#1c3424'), 0.55, t, { ripple: 1 });
   // near detailed trees and undergrowth
   const near = [0.06, 0.3, 0.78, 0.96];
-  for (const [i, f] of near.entries()) lycopsid(b, f * W, H + 4, H * (0.9 + hash(i) * 0.25), 5 + hash(i * 2) * 3, STY.carbonNear, i * 7 + 100, sway);
+  for (const [i, f] of near.entries()) lycopsid(b, f * W, H + 4, H * (0.72 + hash(i) * 0.14), 5 + hash(i * 2) * 3, STY.carbonNear, i * 7 + 100, sway);
   for (let i = 0; i < 6; i++) treefern(b, hash(i * 7.7 + 3) * W, H - 6 - hash(i) * 10, 30 + hash(i * 3) * 20, STY.carbonMid, i + 200, sway);
   for (let i = 0; i < 14; i++) horsetail(b, hash(i * 2.9 + 1) * W, H - hash(i * 1.3) * 8, 18 + hash(i * 4.1) * 26, STY.carbonNear, i + 300, sway);
   // floating mats

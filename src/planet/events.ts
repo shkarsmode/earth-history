@@ -173,7 +173,7 @@ void main() {
   // incline about x, then rotate the node about y
   p = vec3(p.x, p.z * sin(inc), p.z * cos(inc));
   p = vec3(p.x * cos(node) + p.z * sin(node), p.y, -p.x * sin(node) + p.z * cos(node));
-  vCol = kind > 0.975 ? vec3(0.7, 0.85, 1.0) : vec3(0.85, 0.88, 0.95);
+  vCol = kind > 0.975 ? vec3(0.55, 0.68, 0.85) : (aSeed.y > 0.7 ? vec3(0.8, 0.84, 0.92) : vec3(0.42, 0.47, 0.58));
   float big = 1.0;
   if (aIdx < uStations) { big = 2.0; vCol = vec3(1.0, 0.9, 0.6); }
   if (aIdx == 0.0) { vCol = vec3(1.0, 0.4, 0.3); }

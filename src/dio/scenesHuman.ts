@@ -37,12 +37,15 @@ export function iceage(b: PixBuf, t: number, c: Ctx) {
   stars(b, 220, 31, hy, c.amb, 1);
   // aurora curtains
   for (let x = 0; x < W; x++) {
-    const n = tn2(x * 0.012 + t * 0.05, 2) ;
-    const top = Math.round(H * 0.06 + n * 30);
-    const len = 30 + tn2(x * 0.03, t * 0.2) * 50;
+    const fold = tn2(x * 0.011 + t * 0.04, 2);
+    const s = clamp((fold - 0.12) * 1.9) * (0.4 + 0.6 * tn2(x * 0.35, t * 0.6));
+    if (s < 0.05) continue;
+    const top = Math.round(H * 0.05 + fold * 34 + Math.sin(x * 0.03 + t * 0.3) * 6);
+    const len = 22 + s * 70;
     for (let j = 0; j < len; j++) {
-      const a = (1 - j / len) * (0.25 + 0.75 * tn2(x * 0.08 + t * 0.4, j * 0.02)) * 0.8;
-      if (a > bayer8(x, top + j)) b.set(x, top + j, j < 4 ? hex('#a0ffd0') : j < len * 0.5 ? hex('#3ad890') : hex('#1a8a6a'));
+      const f = j / len;
+      const a = s * (f < 0.12 ? f / 0.12 : 1 - (f - 0.12) / 0.88);
+      if (a > bayer8(x, top + j) * 0.9) b.set(x, top + j, f < 0.08 ? hex('#c870d0') : f < 0.3 ? hex('#9affc8') : f < 0.6 ? hex('#3ad890') : hex('#1a7a64'));
     }
   }
   moonDisc(b, W * 0.15, H * 0.16, 11, [0.2, -0.2, 1], {});
@@ -57,7 +60,7 @@ export function iceage(b: PixBuf, t: number, c: Ctx) {
     drawSprite(b, 'mammoth', x, steppe[Math.round(clamp(x, 0, W - 1))] + 8 + (i % 2) * 3, t * 0.8 + i * 0.5, { tint: hex('#1e2c46'), tintK: 0.55 });
   }
   // snowy foreground
-  const fg = ridge(b, { base: H * 0.86, amp: 4, freq: 0.01, seed: 123, fill: hex('#7a8aa8'), edge: hex('#a8b8d0'),
+  const fg = ridge(b, { base: H * 0.74, amp: 4, freq: 0.01, seed: 123, fill: hex('#7a8aa8'), edge: hex('#a8b8d0'),
     shadeFn: (x, y, d) => (tn2(x * 0.15, y * 0.2) > 0.7 ? hex('#6a7a98') : null) });
   // cave on the left: rock arch with ochre hand stencils
   const cx = W * 0.12;
@@ -72,19 +75,20 @@ export function iceage(b: PixBuf, t: number, c: Ctx) {
   }
   // hand stencils on the outer wall (lit by fire)
   for (let k = 0; k < 3; k++) {
-    const hx = W * 0.27 + k * 9, hyy = H * 0.66 + (k % 2) * 6;
+    const hx = W * 0.25 + k * 10, hyy = H * 0.58 + (k % 2) * 7;
     ellipse(b, hx, hyy, 4, 5, hex('#8a3a1e'));
     ellipse(b, hx, hyy + 1, 2, 2.6, hex('#3a2a28'));
     for (let f = -2; f <= 2; f++) b.vline(Math.round(hx + f * 1.2), Math.round(hyy - 5), Math.round(hyy - 2), hex('#3a2a28'));
   }
   // campfire with people
-  const fx = W * 0.42, fy = fg[Math.round(W * 0.42)] + 4;
-  tintCircle(b, fx, fy - 4, 60, hex('#ff8a3a'), 0.7);
+  const fx = W * 0.44, fy = fg[Math.round(W * 0.44)] + 3;
+  tintCircle(b, fx, fy - 4, 78, hex('#ff8a3a'), 0.8);
+  glow(b, fx, fy - 6, 16, hex('#ff9a40'), 0.35);
   drawSprite(b, 'human_sit', fx - 16, fy + 1, t, {});
   drawSprite(b, 'human_sit', fx + 15, fy + 1, t, { flip: true });
   drawSprite(b, 'human_spear', fx + 30, fy, t * 0.5, { flip: true });
   b.hline(Math.round(fx - 6), Math.round(fx + 6), Math.round(fy), hex('#3a2014'));
-  fire(b, fx, fy - 1, 2.4, c.amb);
+  fire(b, fx, fy - 1, 3.4, c.amb);
   // light snow
   for (let i = 0; i < 120; i++) { const y = (hash(i * 1.9) * H + t * 8) % H, x = wrapX(hash(i * 3.3) * W + Math.sin(t * 0.8 + i) * 5, W); b.set(Math.round(x), Math.round(y), hex('#c8d8f0')); }
 }
@@ -168,7 +172,7 @@ export function ziggurat(b: PixBuf, t: number, c: Ctx) {
   for (let i = 0; i < 9; i++) palm(b, hash(i * 3.7 + 1) * W, bank[Math.round(clamp(hash(i * 3.7 + 1) * W, 0, W - 1))] + 2, 36 + hash(i) * 22, STY.tropic, i + 1200, Math.sin(t * 0.5) * 1.2);
   for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', wrapX(W * 0.4 + i * 22 + t * 4, W + 30) - 15, H - 6, t + i * 0.3);
   // a scribe's clay tablet in the corner: cuneiform wedges
-  const px = W - 60, py = H - 46;
+  const px = W - 58, py = Math.round(H * 0.6);
   b.frame(px, py, 44, 32, hex('#b89a70'), hex('#7a5e40'));
   for (let r = 0; r < 5; r++) for (let k = 0; k < 6; k++) if (hash(r * 7 + k) > 0.25) { const x = px + 5 + k * 6, yy = py + 5 + r * 5; b.set(x, yy, hex('#5a4028')); b.set(x + 1, yy, hex('#5a4028')); b.set(x, yy + 1, hex('#7a5e40')); }
 }
@@ -301,7 +305,7 @@ export function city2026(b: PixBuf, t: number, c: Ctx) {
     }
   }
   // data centre with cyan light strips (the age of AI)
-  const dx = Math.round(W * 0.34), dw = 70, dy = Math.round(H * 0.8);
+  const dx = Math.round(W * 0.34), dw = 70, dy = Math.round(H * 0.66);
   b.rect(dx, dy, dw, H - dy, hex('#0c1218'));
   for (let k = 0; k < 6; k++) { const on = (Math.floor(c.amb * 4) + k) % 6 !== 0; b.hline(dx + 4, dx + dw - 4, dy + 4 + k * 4, on ? hex('#3ae8f0') : hex('#1a6a7a')); }
   glow(b, dx + dw / 2, dy + 12, 40, hex('#1a8a9a'), 0.25);

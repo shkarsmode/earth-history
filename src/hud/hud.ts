@@ -20,7 +20,7 @@ const C = {
   playhead: hex('#ffffff'),
 };
 
-export type HudHit = { kind: 'play' } | { kind: 'slower' } | { kind: 'faster' } | { kind: 'seek'; t: number } | { kind: 'scene' } | null;
+export type HudHit = { kind: 'play' } | { kind: 'slower' } | { kind: 'faster' } | { kind: 'sound' } | { kind: 'seek'; t: number } | { kind: 'scene' } | null;
 
 export class Hud {
   mouseX = -1;
@@ -29,13 +29,14 @@ export class Hud {
   dragging = false;
   hideUi = false;
   barAlpha = 1;
+  soundOn = false;
 
   constructor(readonly font: PixelFont) {}
 
   private barY(h: number) { return h - 14; }
 
   private tlRect(w: number) {
-    const x0 = 62, x1 = w - 10;
+    const x0 = 62, x1 = w - 24;
     return { x0, x1 };
   }
 
@@ -52,6 +53,7 @@ export class Hud {
       if (x >= 4 && x < 16) return { kind: 'play' };
       if (x >= 18 && x < 26) return { kind: 'slower' };
       if (x >= 50 && x < 58) return { kind: 'faster' };
+      if (x >= w - 20) return { kind: 'sound' };
       const { x0, x1 } = this.tlRect(w);
       if (x >= x0 - 2 && x <= x1 + 2) return { kind: 'seek', t: this.timeAt(d, w, x) };
     }
@@ -105,9 +107,13 @@ export class Hud {
       f.drawOutlined(buf, t, rx - tw, 15, C.white, C.shadow);
     }
 
+    // ---- film title & end card ----
+    if (d.t < 6.5) this.filmCard(buf, d.t < 0.6 ? d.t / 0.6 : d.t > 5.3 ? Math.max(0, 1 - (d.t - 5.3) / 1.2) : 1);
+    if (d.t > d.total - 7) this.endCard(buf, Math.min(1, (d.t - (d.total - 7)) / 1.2));
+
     // ---- title card at chapter start ----
-    const tl = where.tl;
-    if (tl < 4.2) {
+    const tl = where.ci === 0 ? where.tl - 6 : where.tl;
+    if (tl >= 0 && tl < 4.2) {
       const a = tl < 0.4 ? tl / 0.4 : tl > 3.2 ? 1 - (tl - 3.2) / 1.0 : 1;
       this.titleCard(buf, ch.title.toUpperCase(), (ch.forecast ? 'ПРОГНОЗ · СЦЕНАРИЙ' : eon.name.toUpperCase()), dateText, eonCol, ch.forecast ? C.forecast : C.title, a);
     }
@@ -145,6 +151,44 @@ export class Hud {
 
     // ---- control bar ----
     if (this.barAlpha > 0.05) this.drawBar(buf, d, realNow);
+  }
+
+  private card(buf: PixBuf, lines: [string, RGBA, number][], a: number, cy: number) {
+    const f = this.font;
+    const W = buf.w;
+    const tmp = new PixBuf(W, lines.length * 14 + 16);
+    let y = 10;
+    for (const [s, col, spacing] of lines) {
+      let wv = 0;
+      for (const ch of s) wv += (f.glyph(ch)?.adv ?? 8) + spacing;
+      let px = Math.round((W - wv + spacing) / 2);
+      for (const ch of s) { f.drawOutlined(tmp, ch, px, y, col, C.shadow); px += (f.glyph(ch)?.adv ?? 8) + spacing; }
+      y += 14;
+    }
+    for (let yy = 0; yy < tmp.h; yy++) for (let xx = 0; xx < W; xx++) {
+      const c = tmp.u32[yy * W + xx];
+      if (c >>> 24 && bayer4(xx, yy) < a) buf.set(xx, cy + yy, c);
+    }
+  }
+
+  private filmCard(buf: PixBuf, a: number) {
+    this.card(buf, [
+      ['ИСТОРИЯ ЗЕМЛИ', C.title, 3],
+      ['ОТ ТЕЙИ ДО 5000 ГОДА', C.white, 1],
+      ['', C.white, 0],
+      ['пробел — пауза · стрелки — главы и скорость', C.dim, 0],
+      ['мышь — вращать планету · колесо — зум · M — звук', C.dim, 0],
+    ], a, Math.round(buf.h * 0.3));
+  }
+
+  private endCard(buf: PixBuf, a: number) {
+    this.card(buf, [
+      ['КОНЕЦ', C.title, 3],
+      ['История планеты продолжается', C.white, 0],
+      ['', C.white, 0],
+      ['Карты: NASA Blue Marble, Natural Earth', C.dim, 0],
+      ['Всё после 2026 года — сценарий-прогноз', C.forecast, 0],
+    ], a, Math.round(buf.h * 0.3));
   }
 
   private titleCard(buf: PixBuf, title: string, eon: string, date: string, eonCol: RGBA, titleCol: RGBA, a: number) {
@@ -194,6 +238,12 @@ export class Hud {
     f.draw(buf, st, 38 - Math.round(sw / 2), by + 7, C.white);
     buf.rect(51, by + 3, 5, 1, icon);
     buf.rect(53, by + 1, 1, 5, icon);
+    // sound toggle (speaker)
+    const sx = W - 16;
+    buf.rect(sx, by + 2, 2, 3, icon);
+    for (let i = 0; i < 3; i++) buf.rect(sx + 2 + i, by + 2 - i, 1, 3 + i * 2, icon);
+    if (this.soundOn) { buf.rect(sx + 7, by + 2, 1, 3, icon); buf.rect(sx + 9, by + 1, 1, 5, icon); }
+    else { buf.set(sx + 7, by + 1, hex('#e05050')); buf.set(sx + 8, by + 2, hex('#e05050')); buf.set(sx + 9, by + 3, hex('#e05050')); buf.set(sx + 8, by + 4, hex('#e05050')); buf.set(sx + 7, by + 5, hex('#e05050')); buf.set(sx + 9, by + 1, hex('#e05050')); buf.set(sx + 7, by + 3, hex('#e05050')); buf.set(sx + 9, by + 5, hex('#e05050')); }
     // timeline segments
     const { x0, x1 } = this.tlRect(W);
     const span = x1 - x0;

@@ -177,7 +177,7 @@ export function applyFx(w: Where, year: number, s: PlanetState, shot: Shot, ev: 
     case 'f2100': case 'f3000': case 'f5000': {
       ev.net = 1;
       ev.ai = 1;
-      ev.stations = Math.round(2 + 40 * sramp(year, 2030, 3000) + 100 * sramp(year, 3000, 5000));
+      ev.stations = Math.round(2 + 25 * sramp(year, 2030, 3000) + 35 * sramp(year, 3000, 5000));
       ev.moonBase = sramp(year, 2035, 2150);
       break;
     }

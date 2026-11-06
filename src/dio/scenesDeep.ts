@@ -192,7 +192,7 @@ export function stromatolites(b: PixBuf, t: number, c: Ctx) {
   // sea: green-tinted (dissolved iron) reflecting the orange sky
   water(b, hy, hex('#3a6a56'), 0.45, t, { ripple: 1, sparkle: hex('#ffd890'), sparkleN: 50 });
   // tidal flat foreground
-  const flat = ridge(b, { base: H * 0.8, amp: 5, freq: 0.012, seed: 27, fill: hex('#6a5432'), edge: hex('#8a7448'),
+  const flat = ridge(b, { base: H * 0.76, amp: 5, freq: 0.012, seed: 27, fill: hex('#6a5432'), edge: hex('#8a7448'),
     shadeFn: (x, y, d) => (d < 3 ? hex('#7a6440') : tn2(x * 0.15, y * 0.3) > 0.68 ? hex('#4e4a2a') : tn2(x * 0.3 + 5, y * 0.5) > 0.8 ? hex('#3e5a32') : null) });
   // stromatolite domes: layered cabbage-like mounds
   const domes: [number, number, number, number][] = [];
@@ -202,6 +202,7 @@ export function stromatolites(b: PixBuf, t: number, c: Ctx) {
     const r = 6 + hash(i * 9.3) * 12 * (0.6 + (baseY - hy) / (H - hy));
     domes.push([x, baseY, r, row]);
   }
+  for (const [k, fx] of [0.12, 0.47, 0.83].entries()) domes.push([fx * W, flat[Math.round(fx * W)] + 10 + k * 3, 20 + k * 3, 1]);
   domes.sort((a, b2) => a[1] - b2[1]);
   for (const [x, by, r] of domes) {
     const h = r * 0.9;

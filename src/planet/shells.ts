@@ -75,7 +75,8 @@ void main() {
   vec3 cn = cp / b;
   float sl = dot(cn, normalize(uSunDir));
   float lit = smoothstep(-0.35, 0.35, sl);
-  float I = dens * (0.05 + 0.95 * lit) * uAtmo + uFlash * dens;
+  float fwd = pow(max(dot(rd, normalize(uSunDir)), 0.0), 6.0);   // forward scattering when the Sun is behind the planet
+  float I = dens * (0.05 + 0.95 * lit + 1.6 * fwd) * uAtmo + uFlash * dens;
   float th = bayer8(gl_FragCoord.xy);
   float q = qband(clamp(I * 1.15, 0.0, 1.0), 3.0, th, 0.6);
   if (q <= 0.0) discard;
@@ -195,15 +196,20 @@ void main() {
   vec3 col = uSpace;
   // Milky Way band with dust lanes
   float gb = dot(rd, normalize(uGalPole));
-  float band = exp(-gb * gb * 30.0);
-  float dust = fbm(rd * 7.0, 4);
-  float lane = smoothstep(0.05, 0.35, abs(gb + dust * 0.06)) ;
-  float glow = band * (0.55 + 0.45 * fbm(rd * 3.0 + 4.0, 3)) * mix(0.35, 1.0, lane) * uMilky;
-  float gq = qdither(clamp(glow, 0.0, 1.0), 3.0, th);
-  col = mix(col, col + vec3(0.07, 0.065, 0.11) * gq * 1.6, step(0.01, gq));
-  // nebula tint
-  float nb = fbm(rd * 2.0 + 9.0, 3) * 0.5 + 0.5;
-  col += uNebula * qdither(nb * nb, 3.0, th);
+  float band = exp(-gb * gb * 22.0);
+  float dust = fbm(rd * 6.0, 4);
+  float lane = smoothstep(0.02, 0.22, abs(gb + dust * 0.08 - 0.02));
+  float clump = 0.55 + 0.6 * fbm(rd * 3.0 + 4.0, 4);
+  float glow = band * clump * mix(0.25, 1.0, lane) * uMilky;
+  float gq = qband(clamp(glow * 1.1, 0.0, 1.0), 4.0, th, 0.8);
+  vec3 mw = gq > 0.7 ? vec3(0.23, 0.21, 0.32) : gq > 0.45 ? vec3(0.15, 0.14, 0.24) : vec3(0.09, 0.085, 0.16);
+  col = mix(col, mw, step(0.2, gq));
+  // faint coloured nebulae
+  float nb = fbm(rd * 2.2 + 9.0, 4);
+  float nb2 = fbm(rd * 2.6 + 21.0, 4);
+  col = mix(col, vec3(0.16, 0.06, 0.14), step(th, smoothstep(0.25, 0.6, nb) * 0.55));
+  col = mix(col, vec3(0.05, 0.09, 0.18), step(th, smoothstep(0.28, 0.62, nb2) * 0.5));
+  col += uNebula * qdither(clamp(nb * 0.5 + 0.5, 0.0, 1.0), 3.0, th);
   // Sun: disc + dithered corona rings + 4 rays, in exact screen pixels
   if (uSunVis > 0.5) {
     vec2 d = fc - uSunPx;

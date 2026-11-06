@@ -13,6 +13,9 @@ import { emptyEvents } from './planet/events';
 import { applyFx } from './story/fx';
 import { SCENES } from './dio';
 import { smooth } from './core/hash';
+import { drawGeo } from './hud/geo';
+import { dir } from './story/plates';
+import { Soundtrack } from './core/audio';
 
 THREE.ColorManagement.enabled = false;
 
@@ -77,6 +80,7 @@ async function boot() {
   const planet = new PlanetScene({ plates, day, night, topo }, plateInfo);
   const director = new Director();
   const hud = new Hud(font);
+  const sound = new Soundtrack();
 
   // ---------- map view (debug: flat palaeogeography) ----------
   const mapScene = new THREE.Scene();
@@ -98,12 +102,18 @@ async function boot() {
 
   let mapMode: number | null = null;
 
+  // free look: drag rotates the planet, wheel zooms; eases back to the film camera while playing
+  const look = { lon: 0, lat: 0, zoom: 1, downX: 0, downY: 0, down: false, moved: false };
+
   let lastDioAmb = -1;
   function renderFrame(forceDio = true) {
     if (display.layout()) planet.setSize(display.w, display.h);
     const year = director.year();
     const s = planetAt(mapMode !== null ? 2026 - mapMode * 1e6 : year);
     const shot = director.shot();
+    shot.lon += look.lon;
+    shot.lat = Math.max(-85, Math.min(85, shot.lat + look.lat));
+    shot.rh *= look.zoom;
     const ev = emptyEvents();
     const where = director.locate();
     if (mapMode === null) applyFx(where, year, s, shot, ev, director.amb);
@@ -139,6 +149,17 @@ async function boot() {
     }
     display.renderScene(planet.scene, planet.camera);
     hud.draw(display.overlay, director, performance.now() / 1000);
+    if (!hud.hideUi) {
+      const q = planet.earthGroup.quaternion, cam = planet.camera, W = display.w, H = display.h;
+      drawGeo(display.overlay, font, (lat, lon) => {
+        const p = dir(lat, lon).applyQuaternion(q);
+        const vis = p.dot(cam.position.clone().sub(p).normalize());
+        const s = p.clone().project(cam);
+        return { x: (s.x * 0.5 + 0.5) * W, y: (0.5 - s.y * 0.5) * H, vis };
+      }, year, where.ch.id, 1 - mix, director.amb);
+    }
+    hud.soundOn = sound.enabled;
+    sound.update(director, dio ? dio.id : null, mix);
     display.present(mix, ev.flash, ev.flashColor);
   }
 
@@ -151,7 +172,21 @@ async function boot() {
     const [x, y] = toInternal(e);
     hud.mouseX = x; hud.mouseY = y; hud.lastMove = performance.now() / 1000;
     if (hud.dragging) director.seek(hud.timeAt(director, display.w, x));
+    else if (look.down) {
+      const dx = x - look.downX, dy = y - look.downY;
+      if (Math.abs(dx) + Math.abs(dy) > 3) look.moved = true;
+      if (look.moved) {
+        look.lon -= dx * 0.6; look.lat += dy * 0.5;
+        look.lat = Math.max(-80, Math.min(80, look.lat));
+        look.downX = x; look.downY = y;
+      }
+    }
   });
+  canvas.addEventListener('wheel', (e) => {
+    look.zoom = Math.max(0.45, Math.min(5, look.zoom * Math.exp(-e.deltaY * 0.0012)));
+    hud.lastMove = performance.now() / 1000;
+    e.preventDefault();
+  }, { passive: false });
   canvas.addEventListener('pointerdown', (e) => {
     const [x, y] = toInternal(e);
     hud.lastMove = performance.now() / 1000;
@@ -160,10 +195,16 @@ async function boot() {
     if (h.kind === 'play') director.playing = !director.playing;
     else if (h.kind === 'slower') director.speedIdx = Math.max(0, director.speedIdx - 1);
     else if (h.kind === 'faster') director.speedIdx = Math.min(SPEEDS.length - 1, director.speedIdx + 1);
+    else if (h.kind === 'sound') sound.toggle();
     else if (h.kind === 'seek') { hud.dragging = true; director.seek(h.t); canvas.setPointerCapture(e.pointerId); }
-    else if (h.kind === 'scene') director.playing = !director.playing;
+    else if (h.kind === 'scene') { look.down = true; look.moved = false; look.downX = x; look.downY = y; canvas.setPointerCapture(e.pointerId); }
   });
-  canvas.addEventListener('pointerup', () => { hud.dragging = false; });
+  canvas.addEventListener('pointerup', () => {
+    if (look.down && !look.moved) director.playing = !director.playing; // a click (not a drag) toggles pause
+    look.down = false;
+    hud.dragging = false;
+  });
+  canvas.addEventListener('dblclick', () => { look.lon = 0; look.lat = 0; look.zoom = 1; });
   canvas.addEventListener('pointerleave', () => { hud.mouseX = -1; hud.mouseY = -1; });
   window.addEventListener('keydown', (e) => {
     hud.lastMove = performance.now() / 1000;
@@ -175,6 +216,7 @@ async function boot() {
       case 'ArrowDown': case 'Minus': case 'NumpadSubtract': director.speedIdx = Math.max(0, director.speedIdx - 1); break;
       case 'Home': director.seek(0); break;
       case 'KeyH': hud.hideUi = !hud.hideUi; break;
+      case 'KeyM': sound.toggle(); break;
       case 'KeyF': if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); break;
     }
   });
@@ -182,7 +224,12 @@ async function boot() {
   // ---------- loop ----------
   let last = performance.now();
   function loop(now: number) {
-    director.tick((now - last) / 1000);
+    const dt = (now - last) / 1000;
+    director.tick(dt);
+    if (director.playing && !look.down) {
+      const k = Math.exp(-Math.min(dt, 0.1) * 0.8);
+      look.lon *= k; look.lat *= k; look.zoom = 1 + (look.zoom - 1) * k;
+    }
     last = now;
     renderFrame(false);
     requestAnimationFrame(loop);
