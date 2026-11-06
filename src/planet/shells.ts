@@ -102,6 +102,7 @@ uniform float uTime;
 uniform vec3 uEarthDir;   // world direction to Earth (earthshine)
 uniform float uGlow;      // proto-Moon heat glow
 uniform vec4 uMare[24];   // lat, lon, radius (deg), darkness
+uniform float uBase;      // future lunar settlements (lights on the night side)
 
 float mareMask(vec3 n) {
   float m = 0.0;
@@ -161,6 +162,15 @@ void main() {
   // earthshine on the night side
   float es = max(dot(N, normalize(uEarthDir)), 0.0) * (1.0 - band);
   col += alb * vec3(0.06, 0.08, 0.12) * step(th, es * 0.8);
+  // lunar settlements (scenario): a few warm lights on the night side
+  if (uBase > 0.0 && ndl < 0.05) {
+    vec2 sites[5] = vec2[5](vec2(-85.0, 30.0), vec2(-70.0, -10.0), vec2(20.0, 30.0), vec2(-5.0, -15.0), vec2(40.0, -40.0));
+    for (int i = 0; i < 5; i++) {
+      if (float(i) > uBase * 5.0) break;
+      vec3 c = lonLatToDir(vec2(sites[i].y, sites[i].x) * 0.0174533);
+      if (dot(n, c) > 0.9985) col = vec3(1.0, 0.85, 0.5);
+    }
+  }
   // molten proto-Moon
   if (uLava > 0.0) {
     vec3 vor = voronoi3(n * 6.0 + vec3(uTime * 0.03));

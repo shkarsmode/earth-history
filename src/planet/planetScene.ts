@@ -175,6 +175,7 @@ export class PlanetScene {
         uTime: { value: 0 },
         uEarthDir: { value: new THREE.Vector3() },
         uGlow: { value: 0 },
+        uBase: { value: 0 },
         uMare: { value: Array.from({ length: 24 }, (_, i) => (MARIA[i] ? new THREE.Vector4(...MARIA[i]) : new THREE.Vector4(0, 0, 0, 0))) },
       },
     });
@@ -365,6 +366,7 @@ export class PlanetScene {
     }
     mu.uCraters.value = s.moonCraters;
     mu.uTime.value = tAmb;
+    mu.uBase.value = ev.moonBase;
     (mu.uEarthDir.value as THREE.Vector3).copy(this.moon.position).negate().normalize();
 
     // ---------- events ----------

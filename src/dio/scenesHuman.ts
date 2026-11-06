@@ -376,25 +376,54 @@ export function future(b: PixBuf, t: number, c: Ctx) {
     if (bayer4(x, y + 1) < 0.5) b.set(x, y + 1, hex('#9ab0d8'));
     if (x % 40 === 0) { b.rect(x - 1, y - 1, 3, 3, hex('#fff6d0')); }
   }
-  moonDisc(b, W * 0.12, H * 0.13, 9, [0.9, -0.1, 0.4], {});
-  for (let k = 0; k < 6; k++) b.set(Math.round(W * 0.12 - 6 + hash(k) * 5), Math.round(H * 0.13 + (hash(k * 3) - 0.5) * 10), hex('#ffe08a')); // lunar settlements
+  moonDisc(b, W * 0.84, H * 0.1, 9, [-0.9, -0.1, 0.4], {});
+  for (let k = 0; k < 6; k++) b.set(Math.round(W * 0.84 + 2 + hash(k) * 5), Math.round(H * 0.1 + (hash(k * 3) - 0.5) * 10), hex('#ffe08a')); // lunar settlements on the night side
   b.set(Math.round(W * 0.9), Math.round(H * 0.32), hex('#ff7a4a')); // Mars
   sunDisc(b, W * 0.5, hy - 6, 11, hex('#fffbe8'), hex('#ffe6b8'), hex('#f8c8a0'), 3);
-  // green towers with terraces and solar skins
-  for (let i = 0; i < 9; i++) {
-    const x = Math.round(W * 0.05 + i * W * 0.11 + (hash(i) - 0.5) * 10), w = 16 + Math.round(hash(i * 2) * 10), h = 60 + hash(i * 3) * 90;
-    const top = Math.round(hy - h);
-    b.rect(x, top, w, Math.round(h), hex('#c8d4e0'));
-    b.rect(x + w - 4, top, 4, Math.round(h), hex('#9aa8b8'));
-    for (let y = top + 6; y < hy; y += 10) { b.hline(x - 2, x + w + 1, y, hex('#3e8a3a')); for (let k = 0; k < w; k += 3) if (hash(x + k + y) > 0.4) b.set(x + k, y - 1, hex('#5aaa4a')); }
-    for (let y = top + 2; y < hy - 2; y += 4) for (let k = 2; k < w - 5; k += 3) b.set(x + k, y, hex('#3a5a9a'));
+  // far hills and a lake reflecting the dawn
+  ridge(b, { base: hy - 4, amp: 6, freq: 0.012, seed: 160, fill: hex('#5a7a9a'), edge: hex('#7a9ab8') });
+  water(b, hy, hex('#4a6a9a'), 0.45, t, { ripple: 1, sparkle: hex('#fff0d8'), sparkleN: 24 });
+  // wind turbines on the far hills
+  for (let i = 0; i < 6; i++) {
+    const x = Math.round(W * (0.06 + i * 0.07)), by = hy - 3, th = 16;
+    b.vline(x, by - th, by, hex('#8a9ab8'));
+    for (let k = 0; k < 3; k++) { const a2 = c.amb * 2 + i + (k * Math.PI * 2) / 3; for (let r = 0; r < 6; r++) b.set(Math.round(x + Math.cos(a2) * r), Math.round(by - th + Math.sin(a2) * r), hex('#c8d4e8')); }
   }
-  // wind turbines
-  for (let i = 0; i < 4; i++) {
-    const x = Math.round(W * 0.62 + i * 34), by = hy + 2, th = 40;
-    b.vline(x, by - th, by, hex('#e8eef4'));
-    for (let k = 0; k < 3; k++) { const a = c.amb * 2 + i + (k * Math.PI * 2) / 3; for (let r = 0; r < 14; r++) b.set(Math.round(x + Math.cos(a) * r), Math.round(by - th + Math.sin(a) * r), hex('#ffffff')); }
+  // the city: varied eco-towers, backlit by the dawn (rim light on the sun side, warm windows, green terraces)
+  const sunX = W * 0.5;
+  const kinds = ['spire', 'dome', 'terrace', 'ring', 'twist', 'spire', 'terrace', 'dome', 'ring'];
+  for (let i = 0; i < kinds.length; i++) {
+    const kind = kinds[i];
+    const cx = Math.round(W * 0.07 + i * W * 0.107 + (hash(i) - 0.5) * 12);
+    const w = 18 + Math.round(hash(i * 2) * 10), h = 70 + hash(i * 3) * 100;
+    const base = hy, top = Math.round(base - h);
+    for (let y = top; y < base; y++) {
+      const f = (y - top) / h;
+      let hw = w / 2;
+      if (kind === 'spire') hw = (w / 2) * (0.35 + 0.65 * Math.min(1, f * 1.6));
+      if (kind === 'terrace') hw = (w / 2) * (0.55 + 0.45 * Math.floor(f * 5) / 4);
+      if (kind === 'twist') hw = (w / 2) * (0.8 + 0.2 * Math.sin(f * 14));
+      if (kind === 'dome' && f < 0.12) hw = (w / 2) * Math.sqrt(Math.max(0, 1 - Math.pow(1 - f / 0.12, 2)));
+      const x0 = Math.round(cx - hw), x1 = Math.round(cx + hw);
+      for (let x = x0; x <= x1; x++) {
+        const e = (x - x0) / Math.max(1, x1 - x0);
+        let col = e < 0.5 ? hex('#2e3a62') : hex('#252e50');
+        const towardSun = cx < sunX ? e > 0.85 : e < 0.15;
+        if (towardSun) col = hex('#e8b890');
+        // windows: warm at dawn, a few dark
+        if (!towardSun && (y - top) % 4 === 2 && (x - x0) % 3 === 1 && hash(x * 0.71 + y * 1.37 + i) > 0.35) col = hex('#ffd89a');
+        // green terraces every ~11 px
+        if ((y - top) % 11 === 0 || (kind === 'terrace' && (y - top) % Math.round(h / 5) === 0)) col = hash(x + y) > 0.3 ? hex('#4a9a4a') : hex('#7ac85a');
+        b.set(x, y, col);
+      }
+      if ((y - top) % 11 === 0) { b.set(x0 - 1, y + 1, hex('#3a7a3a')); b.set(x1 + 1, y + 1, hex('#3a7a3a')); }
+    }
+    if (kind === 'spire') b.vline(cx, top - 10, top, hex('#c8d4e8'));
+    if (kind === 'ring') { const ry = top + Math.round(h * 0.18); b.hline(cx - w, cx + w, ry, hex('#e8eef8')); b.hline(cx - w + 1, cx + w - 1, ry + 1, hex('#8a9ac8')); }
+    if (kind === 'dome') b.hline(cx - 2, cx + 2, top + 1, hex('#bfe8ff'));
   }
+  // small flyers between the towers
+  for (let i = 0; i < 8; i++) { const x = wrapX(hash(i * 3.3) * W + t * (12 + i * 3) * (i % 2 ? 1 : -1), W); b.set(Math.round(x), Math.round(H * (0.35 + (i % 4) * 0.06)), hex('#ffffff')); }
   // shuttle climbing to the ring
   const sh = (t * 0.12) % 1;
   const sx = W * 0.3 + sh * W * 0.25, sy = hy - sh * hy * 0.8;
