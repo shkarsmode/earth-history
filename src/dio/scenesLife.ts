@@ -242,12 +242,12 @@ export function savanna(b: PixBuf, t: number, c: Ctx) {
   const fg = ridge(b, { base: H * 0.76, amp: 3, freq: 0.01, seed: 113, fill: hex('#b88a3e'), edge: hex('#d0a450'),
     shadeFn: (x, y, d) => (tn2(x * 0.3, y * 0.3) > 0.7 ? hex('#a0783a') : null) });
   acacia(b, W * 0.82, fg[Math.round(W * 0.82)] + 2, 40, STY.savanna, 1100);
-  // a small group walking on two legs
+  grass(b, fg, 0, W, 0.75, 9, [hex('#c8a050'), hex('#d8b460'), hex('#a8843a')], t, 13);
+  // a small group walking on two legs (drawn over the grass so their stride shows)
   for (let i = 0; i < 3; i++) {
     const x = W * 0.36 + i * 13 + t * 5;
     drawSprite(b, 'hominin', x, fg[Math.round(clamp(x, 0, W - 1))] + 2 - (i === 1 ? 0 : 1), t * 1.4 + i * 0.6, { tint: hex('#3a2a20'), tintK: 0.3 });
   }
-  grass(b, fg, 0, W, 0.75, 9, [hex('#c8a050'), hex('#d8b460'), hex('#a8843a')], t, 13);
   for (let i = 0; i < 4; i++) drawSprite(b, 'bird', wrapX(t * 14 + i * 60, W + 20) - 10, H * (0.2 + i * 0.03), t * 2 + i, { sil: hex('#3a2a30') });
 }
 

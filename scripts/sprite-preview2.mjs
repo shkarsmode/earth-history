@@ -2,10 +2,11 @@
 // mid-grey and on a dark panel (plus optional extra backdrops), with a data check.
 //
 //   node scripts/sprite-preview2.mjs [--scale 4] [--only cow,goat] [--bg #b88a3e,#7a8aa8] [--diff]
-//                                    [--out .snaps/sprites2-sheet.png]
+//                                    [--src src/dio/sprites2.ts] [--out .snaps/sprites2-sheet.png]
 //
 // --bg    adds one panel per colour (e.g. the ground colour of the scene the sprite lives in)
 // --diff  prints, for every frame, the rows that differ from the previous frame (body jitter check)
+// --src   another file of the same shape (handy for trying variants without touching the game data)
 // The red tick under each frame marks the anchor (default bottom-centre, as in src/dio/spr.ts).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,10 +26,11 @@ const ONLY = opt('only', '') ? opt('only', '').split(',').map((s) => s.trim()).f
 const OUT = path.resolve(root, opt('out', '.snaps/sprites2-sheet.png'));
 const EXTRA_BG = opt('bg', '') ? opt('bg', '').split(',').map((s) => s.trim()).filter((s) => /^#[0-9a-f]{6}$/i.test(s)) : [];
 const DIFF = args.includes('--diff');
+const SRC = path.resolve(root, opt('src', 'src/dio/sprites2.ts'));
 
 // ---------- load the TS data without a TS toolchain ----------
 function loadSprites() {
-  let src = fs.readFileSync(path.join(root, 'src/dio/sprites2.ts'), 'utf8');
+  let src = fs.readFileSync(SRC, 'utf8');
   src = src.replace(/export\s+interface\s+\w+\s*\{[\s\S]*?\n\}/g, '');
   src = src.replace(/:\s*Record<string,\s*SpriteDef>/g, '');
   src = src.replace(/export\s+const\s+SPRITES/, 'const SPRITES');

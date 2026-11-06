@@ -132,7 +132,8 @@ export function farm(b: PixBuf, t: number, c: Ctx) {
   drawSprite(b, 'farmer', W * 0.3, fg[Math.round(W * 0.3)] + 12, t * 1.2);
   drawSprite(b, 'farmer', W * 0.56, fg[Math.round(W * 0.56)] + 16, t * 1.2 + 0.5, { flip: true });
   for (let i = 0; i < 4; i++) drawSprite(b, 'goat', W * 0.7 + i * 14 + Math.sin(t * 0.3 + i) * 3, hills[Math.round(W * 0.7)] + 18 + (i % 2) * 3, t + i, { flip: i % 2 === 0 });
-  drawSprite(b, 'cow', W * 0.18, hills[Math.round(W * 0.18)] + 16, t * 0.6);
+  const cx = W * 0.1 + t * 3; // a cow ambling along the hillside path
+  drawSprite(b, 'cow', cx, hills[Math.round(clamp(cx, 0, W - 1))] + 16, t * 0.75);
 }
 
 // ============ Mesopotamia: ziggurat, river, writing ============
@@ -176,7 +177,7 @@ export function ziggurat(b: PixBuf, t: number, c: Ctx) {
   reedboat(b, wrapX(W * 0.8 - t * 4, W + 40) - 20, Math.round(H * 0.66), t + 1.3);
   const bank = ridge(b, { base: H * 0.8, amp: 3, freq: 0.01, seed: 143, fill: hex('#a89060'), edge: hex('#c0a874') });
   for (let i = 0; i < 9; i++) palm(b, hash(i * 3.7 + 1) * W, bank[Math.round(clamp(hash(i * 3.7 + 1) * W, 0, W - 1))] + 2, 36 + hash(i) * 22, STY.tropic, i + 1200, Math.sin(t * 0.5) * 1.2);
-  for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', wrapX(W * 0.4 + i * 22 + t * 4, W + 30) - 15, Math.round(H * 0.79), t + i * 0.3);
+  for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', W * 0.34 + i * 26, Math.round(H * 0.79), t + i * 0.3, { flip: i === 1 });
   // a scribe's clay tablet in the corner: cuneiform wedges
   const px = W - 58, py = Math.round(H * 0.6);
   b.frame(px, py, 44, 32, hex('#b89a70'), hex('#7a5e40'));
