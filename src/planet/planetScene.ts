@@ -247,7 +247,9 @@ export class PlanetScene {
     const cam = this.camera;
     cam.fov = shot.fov;
     const tanHalf = Math.tan((shot.fov * Math.PI) / 360);
-    const alpha = Math.atan(2 * shot.rh * tanHalf);
+    // shots are framed for 16:9; on narrower windows keep the planet's size relative to the width
+    const fit = Math.min(1, this.W / this.H / (16 / 9));
+    const alpha = Math.atan(2 * shot.rh * fit * tanHalf);
     const dist = Math.max(1.06, 1 / Math.sin(alpha));
     cam.position.set(0, 0, dist);
     cam.up.set(0, 1, 0);
