@@ -20,7 +20,7 @@ const C = {
   playhead: hex('#ffffff'),
 };
 
-export type HudHit = { kind: 'play' } | { kind: 'slower' } | { kind: 'faster' } | { kind: 'sound' } | { kind: 'seek'; t: number } | { kind: 'scene' } | null;
+export type HudHit = { kind: 'play' } | { kind: 'slower' } | { kind: 'faster' } | { kind: 'sound' } | { kind: 'menu' } | { kind: 'seek'; t: number } | { kind: 'scene' } | null;
 
 export class Hud {
   mouseX = -1;
@@ -30,13 +30,14 @@ export class Hud {
   hideUi = false;
   barAlpha = 1;
   soundOn = false;
+  menuOpen = false;
 
   constructor(readonly font: PixelFont) {}
 
   private barY(h: number) { return h - 14; }
 
   private tlRect(w: number) {
-    const x0 = 62, x1 = w - 24;
+    const x0 = 74, x1 = w - 24;
     return { x0, x1 };
   }
 
@@ -54,6 +55,7 @@ export class Hud {
       if (x >= 18 && x < 26) return { kind: 'slower' };
       if (x >= 50 && x < 58) return { kind: 'faster' };
       if (x >= w - 20) return { kind: 'sound' };
+      if (x >= 61 && x < 71) return { kind: 'menu' };
       const { x0, x1 } = this.tlRect(w);
       if (x >= x0 - 2 && x <= x1 + 2) return { kind: 'seek', t: this.timeAt(d, w, x) };
     }
@@ -151,6 +153,48 @@ export class Hud {
 
     // ---- control bar ----
     if (this.barAlpha > 0.05) this.drawBar(buf, d, realNow);
+    if (this.menuOpen) this.drawMenu(buf, d);
+  }
+
+  // ---------- chapter menu ----------
+  private menuLayout(d: Director, W: number, H: number) {
+    const cols = W >= 400 ? 2 : 1;
+    const rows = Math.ceil(d.chapters.length / cols);
+    const lh = Math.min(11, Math.floor((H - 40) / rows));
+    const colW = Math.floor((W - 24) / cols);
+    const top = Math.max(28, Math.round((H - rows * lh - 26) / 2) + 14);
+    return { cols, rows, lh, colW, top, left: 12 };
+  }
+
+  menuHit(d: Director, W: number, H: number, x: number, y: number): number {
+    const L = this.menuLayout(d, W, H);
+    const c = Math.floor((x - L.left) / L.colW), r = Math.floor((y - L.top) / L.lh);
+    if (c < 0 || c >= L.cols || r < 0 || r >= L.rows) return -1;
+    const i = c * L.rows + r;
+    return i < d.chapters.length ? i : -1;
+  }
+
+  drawMenu(buf: PixBuf, d: Director) {
+    const W = buf.w, H = buf.h, f = this.font;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) buf.blend(x, y, C.panel, 0.93);
+    const L = this.menuLayout(d, W, H);
+    f.drawOutlined(buf, 'ГЛАВЫ', L.left, L.top - 6, C.title, C.shadow);
+    const cur = d.locate().ci;
+    const hov = this.menuHit(d, W, H, this.mouseX, this.mouseY);
+    d.chapters.forEach((ch, i) => {
+      const c = Math.floor(i / L.rows), r = i % L.rows;
+      const x = L.left + c * L.colW, y = L.top + r * L.lh;
+      buf.rect(x, y + 2, 3, 5, hex(EONS[ch.eon].color));
+      let title = ch.title.toUpperCase();
+      while (f.measure(title) > L.colW - 12 && title.length > 4) title = title.slice(0, -2) + '…';
+      const col = i === hov ? C.white : i === cur ? C.title : ch.forecast ? C.forecast : C.dim;
+      if (i === hov) buf.rect(x + 5, y, L.colW - 8, L.lh, hex('#22203a'));
+      f.draw(buf, title, x + 7, y + 8, col);
+    });
+    const show = hov >= 0 ? hov : cur;
+    const ch = d.chapters[show];
+    const date = ch.y0 === ch.y1 ? 'около 4,5 млрд лет назад' : yearLabel(d.yearOf(ch, 0));
+    f.drawOutlined(buf, `${ch.title} · ${date}`, L.left, Math.min(H - 4, L.top + L.rows * L.lh + 10), hex(EONS[ch.eon].color), C.shadow);
   }
 
   private card(buf: PixBuf, lines: [string, RGBA, number][], a: number, cy: number) {
@@ -177,7 +221,8 @@ export class Hud {
       ['ОТ ТЕЙИ ДО 5000 ГОДА', C.white, 1],
       ['', C.white, 0],
       ['пробел — пауза · стрелки — главы и скорость', C.dim, 0],
-      ['мышь — вращать планету · колесо — зум · M — звук', C.dim, 0],
+      ['мышь — вращать планету · колесо — зум', C.dim, 0],
+      ['C — список глав · M — звук · F — полный экран', C.dim, 0],
     ], a, Math.round(buf.h * 0.3));
   }
 
@@ -238,6 +283,8 @@ export class Hud {
     f.draw(buf, st, 38 - Math.round(sw / 2), by + 7, C.white);
     buf.rect(51, by + 3, 5, 1, icon);
     buf.rect(53, by + 1, 1, 5, icon);
+    // chapter menu button (≡)
+    for (let k = 0; k < 3; k++) buf.rect(63, by + 1 + k * 2, 7, 1, this.menuOpen ? C.title : icon);
     // sound toggle (speaker)
     const sx = W - 16;
     buf.rect(sx, by + 2, 2, 3, icon);

@@ -194,12 +194,19 @@ async function boot() {
   canvas.addEventListener('pointerdown', (e) => {
     const [x, y] = toInternal(e);
     hud.lastMove = performance.now() / 1000;
+    if (hud.menuOpen) {
+      const ci = hud.menuHit(director, display.w, display.h, x, y);
+      if (ci >= 0) { director.t = director.starts[ci] + 0.001; director.playing = true; }
+      hud.menuOpen = false;
+      return;
+    }
     const h = hud.hit(director, display.w, display.h, x, y);
     if (!h) return;
     if (h.kind === 'play') director.playing = !director.playing;
     else if (h.kind === 'slower') director.speedIdx = Math.max(0, director.speedIdx - 1);
     else if (h.kind === 'faster') director.speedIdx = Math.min(SPEEDS.length - 1, director.speedIdx + 1);
     else if (h.kind === 'sound') sound.toggle();
+    else if (h.kind === 'menu') hud.menuOpen = !hud.menuOpen;
     else if (h.kind === 'seek') { hud.dragging = true; director.seek(h.t); canvas.setPointerCapture(e.pointerId); }
     else if (h.kind === 'scene') { look.down = true; look.moved = false; look.downX = x; look.downY = y; canvas.setPointerCapture(e.pointerId); }
   });
@@ -221,6 +228,8 @@ async function boot() {
       case 'Home': director.seek(0); break;
       case 'KeyH': hud.hideUi = !hud.hideUi; break;
       case 'KeyM': sound.toggle(); break;
+      case 'KeyC': case 'Tab': hud.menuOpen = !hud.menuOpen; e.preventDefault(); break;
+      case 'Escape': hud.menuOpen = false; break;
       case 'KeyF': if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); break;
     }
   });
