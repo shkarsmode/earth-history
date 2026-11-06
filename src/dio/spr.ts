@@ -10,9 +10,9 @@ interface SpriteDef {
 }
 interface Baked { w: number; h: number; frames: Uint32Array[]; ax: number; ay: number; fps: number }
 
-// the sprite sheet is optional at build time (glob returns {} when the file is absent)
-const mods = import.meta.glob('./sprites.ts', { eager: true }) as Record<string, { SPRITES?: Record<string, SpriteDef> }>;
-const DEFS: Record<string, SpriteDef> = Object.values(mods)[0]?.SPRITES ?? {};
+// sprite sheets are optional at build time (glob returns {} when files are absent); several files merge
+const mods = import.meta.glob(['./sprites.ts', './sprites2.ts'], { eager: true }) as Record<string, { SPRITES?: Record<string, SpriteDef> }>;
+const DEFS: Record<string, SpriteDef> = Object.assign({}, ...Object.values(mods).map((m) => m.SPRITES ?? {}));
 const cache = new Map<string, Baked | null>();
 
 function bake(name: string): Baked | null {
