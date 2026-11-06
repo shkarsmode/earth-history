@@ -76,7 +76,7 @@ export function iceage(b: PixBuf, t: number, c: Ctx) {
   }
   // hand stencils on the outer wall (lit by fire)
   for (let k = 0; k < 3; k++) {
-    const hx = W * 0.25 + k * 10, hyy = H * 0.58 + (k % 2) * 7;
+    const hx = W * 0.2 + k * 10, hyy = H * 0.68 + (k % 2) * 7;
     ellipse(b, hx, hyy, 4, 5, hex('#8a3a1e'));
     ellipse(b, hx, hyy + 1, 2, 2.6, hex('#3a2a28'));
     for (let f = -2; f <= 2; f++) b.vline(Math.round(hx + f * 1.2), Math.round(hyy - 5), Math.round(hyy - 2), hex('#3a2a28'));
