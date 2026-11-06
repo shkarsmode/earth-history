@@ -5,6 +5,7 @@ import { hash, clamp } from '../core/hash';
 import { skyGradient, stars, sunDisc, moonDisc, ridge, water, pal, tn2, glow, grade, bayer4, bayer8, lerpc, shade, ellipse, tintCircle, poly, rampAt } from './engine';
 import { palm, broadleaf, conifer, grass, cloud, STY, type PlantStyle } from './flora';
 import { drawSprite } from './spr';
+import { rocket, locomotive, wagon, airliner, drone, reedboat, caravel } from './machines';
 import type { Ctx } from './scenesDeep';
 
 const wrapX = (x: number, W: number) => ((x % W) + W) % W;
@@ -166,8 +167,8 @@ export function ziggurat(b: PixBuf, t: number, c: Ctx) {
   b.rect(0, hy + 6, W, 3, hex('#b08a5a'));
   // the river with date palms and reed boats
   water(b, hy + 9, hex('#3a7a8a'), 0.5, t, { ripple: 1, sparkle: hex('#ffffff'), sparkleN: 30, bottom: Math.round(H * 0.74) });
-  drawSprite(b, 'reedboat', wrapX(W * 0.2 + t * 6, W + 40) - 20, Math.round(H * 0.7), t);
-  drawSprite(b, 'reedboat', wrapX(W * 0.8 - t * 4, W + 40) - 20, Math.round(H * 0.66), t, { flip: true });
+  reedboat(b, wrapX(W * 0.2 + t * 6, W + 40) - 20, Math.round(H * 0.7), t);
+  reedboat(b, wrapX(W * 0.8 - t * 4, W + 40) - 20, Math.round(H * 0.66), t + 1.3);
   const bank = ridge(b, { base: H * 0.8, amp: 3, freq: 0.01, seed: 143, fill: hex('#a89060'), edge: hex('#c0a874') });
   for (let i = 0; i < 9; i++) palm(b, hash(i * 3.7 + 1) * W, bank[Math.round(clamp(hash(i * 3.7 + 1) * W, 0, W - 1))] + 2, 36 + hash(i) * 22, STY.tropic, i + 1200, Math.sin(t * 0.5) * 1.2);
   for (let i = 0; i < 3; i++) drawSprite(b, 'farmer', wrapX(W * 0.4 + i * 22 + t * 4, W + 30) - 15, Math.round(H * 0.79), t + i * 0.3);
@@ -210,11 +211,7 @@ export function voyage(b: PixBuf, t: number, c: Ctx) {
   for (let y = hy + 4; y < H; y += 5) for (let x = 0; x < W; x++) if (tn2(x * 0.05 + t * 0.4 + y, y * 0.3) > 0.72) b.set(x, y, hex('#7a7aa8'));
   // the caravel, bobbing on the swell
   const cx = W * 0.4 + Math.sin(t * 0.08) * 20, cy = hy + 34 + Math.sin(t * 1.3) * 1.5;
-  if (!drawSprite(b, 'caravel', cx, cy, t)) {
-    poly(b, [[cx - 18, cy - 6], [cx + 18, cy - 6], [cx + 13, cy], [cx - 13, cy]], hex('#3a2418'));
-    b.vline(Math.round(cx), Math.round(cy - 34), Math.round(cy - 6), hex('#3a2418'));
-    poly(b, [[cx - 12, cy - 30], [cx + 12, cy - 30], [cx + 10, cy - 10], [cx - 10, cy - 10]], hex('#e8d8c0'));
-  }
+  caravel(b, cx, cy, t);
   for (let i = 0; i < 5; i++) drawSprite(b, 'bird', wrapX(W * 0.3 + i * 40 + t * (10 + i * 2), W + 20) - 10, H * (0.25 + (i % 3) * 0.05) + Math.sin(t * 2 + i) * 3, t * 2 + i, { sil: hex('#2a1a2e') });
 }
 
@@ -266,9 +263,10 @@ export function industry(b: PixBuf, t: number, c: Ctx) {
     }
   }
   const tx = wrapX(t * 26, W + 200) - 100;
-  drawSprite(b, 'locomotive', tx, vy, t);
-  drawSprite(b, 'wagon', tx - 36, vy, t);
-  drawSprite(b, 'wagon', tx - 64, vy, t);
+  locomotive(b, tx, vy, t);
+  wagon(b, tx - 35, vy, t, 1);
+  wagon(b, tx - 63, vy, t, 0);
+  wagon(b, tx - 91, vy, t, 0);
   for (let p = 0; p < 50; p++) { const ph = (t * 1.2 + hash(p * 3.1)) % 1; const x = tx + 14 - ph * 40, y = vy - 18 - ph * 22 + Math.sin(p) * 2; const r = 1 + ph * 4; ellipse(b, x, y, r, r * 0.8, ph < 0.5 ? hex('#e8e4e0') : hex('#b8b0ac')); }
   // street, lamps, workers
   const st = Math.round(H * 0.8);
@@ -305,7 +303,7 @@ export function launch(b: PixBuf, t: number, c: Ctx) {
     glow(b, px, ry + 10, 34, hex('#ffb060'), 0.55);
     tintCircle(b, px, tb, 120, hex('#ff9a50'), 0.6);
   }
-  drawSprite(b, 'rocket', px, Math.round(ry), t);
+  rocket(b, px, ry);
   // billowing smoke at the pad
   for (let p = 0; p < 70; p++) {
     const ph = ((t * 0.4 + hash(p * 1.7)) % 1) * Math.min(1, t / 2);
@@ -355,9 +353,8 @@ export function city2026(b: PixBuf, t: number, c: Ctx) {
   for (let k = 0; k < 6; k++) { const on = (Math.floor(c.amb * 4) + k) % 6 !== 0; b.hline(dx + 4, dx + dw - 4, dy + 4 + k * 4, on ? hex('#3ae8f0') : hex('#1a6a7a')); }
   glow(b, dx + dw / 2, dy + 12, 40, hex('#1a8a9a'), 0.25);
   // airliner and drones
-  drawSprite(b, 'airliner', wrapX(t * 20, W + 60) - 30, H * 0.22, t);
-  if (Math.floor(c.amb * 2) % 2 === 0) b.set(Math.round(wrapX(t * 20, W + 60) - 30 + 11), Math.round(H * 0.22) - 3, hex('#ff4040'));
-  for (let i = 0; i < 5; i++) drawSprite(b, 'drone', W * (0.15 + i * 0.17) + Math.sin(t * 0.7 + i) * 12, H * (0.45 + (i % 3) * 0.06) + Math.cos(t + i) * 4, c.amb * 4 + i);
+  airliner(b, wrapX(t * 20, W + 60) - 30, H * 0.22, Math.floor(c.amb * 2) % 2 === 0);
+  for (let i = 0; i < 5; i++) drone(b, W * (0.15 + i * 0.17) + Math.sin(t * 0.7 + i) * 12, H * (0.45 + (i % 3) * 0.06) + Math.cos(t + i) * 4, c.amb + i * 0.3);
   // street light streaks
   const sy = H - 5;
   for (let i = 0; i < 30; i++) { const x = wrapX(hash(i * 2.2) * W + t * (40 + hash(i) * 30) * (i % 2 ? 1 : -1), W); b.hline(Math.round(x), Math.round(x + 4), sy + (i % 2), i % 2 ? hex('#ff4a3a') : hex('#fff4d0')); }
