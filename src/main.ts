@@ -230,6 +230,23 @@ async function boot() {
       case 'KeyM': sound.toggle(); break;
       case 'KeyC': case 'Tab': hud.menuOpen = !hud.menuOpen; e.preventDefault(); break;
       case 'Escape': hud.menuOpen = false; break;
+      case 'KeyS': {
+        // save the current frame as a crisp ×4 PNG
+        const k = 4, c2 = document.createElement('canvas');
+        c2.width = display.w * k; c2.height = display.h * k;
+        const ctx = c2.getContext('2d')!;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(canvas, 0, 0, c2.width, c2.height);
+        c2.toBlob((blob) => {
+          if (!blob) return;
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `earth-${director.locate().ch.id}.png`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        }, 'image/png');
+        break;
+      }
       case 'KeyF': if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); break;
     }
   });
