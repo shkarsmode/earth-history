@@ -94,7 +94,7 @@ export class Hud {
 
     // ---- top-right: forecast badge, speed/pause ----
     let rx = W - 8;
-    if (ch.forecast && Math.floor(realNow * 1.5) % 2 === 0) {
+    if (ch.forecast) {
       const t = 'ПРОГНОЗ';
       const tw = f.measure(t);
       buf.frame(rx - tw - 6, 5, tw + 8, 13, hex('#2a1238'), C.forecast);
