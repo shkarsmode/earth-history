@@ -8,11 +8,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 // Dev-only endpoint: the page can POST a PNG of the current frame (window.__earth.snap)
 // and it lands in .snaps/<name>.png — used to verify scenes even when the browser pane is hidden.
 function snapPlugin(): Plugin {
-  return {
-    name: 'earth-snap',
-    apply: 'serve',
-    configureServer(server) {
-      server.middlewares.use('/__snap', (req, res) => {
+  const handler = (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => {
         const url = new URL(req.url ?? '/', 'http://local');
         const name = (url.searchParams.get('name') || 'snap').replace(/[^\w.-]/g, '_');
         const chunks: Buffer[] = [];
@@ -24,8 +20,12 @@ function snapPlugin(): Plugin {
           res.setHeader('content-type', 'text/plain');
           res.end('ok ' + name);
         });
-      });
-    },
+  };
+  return {
+    name: 'earth-snap',
+    // dev server and `vite preview` only — the endpoint never exists in the deployed build
+    configureServer(server) { server.middlewares.use('/__snap', handler); },
+    configurePreviewServer(server) { server.middlewares.use('/__snap', handler); },
   };
 }
 

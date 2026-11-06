@@ -75,11 +75,16 @@ export function iceage(b: PixBuf, t: number, c: Ctx) {
     else b.set(x, y, tn2(x * 0.15, y * 0.15) > 0.6 ? hex('#3a3236') : hex('#2a2428'));
   }
   // hand stencils on the outer wall (lit by fire)
+  // negative hand stencils: ochre sprayed around a hand held against the rock
+  const HAND = ['.#.#.#..', '.#.#.#..', '.#.#.#.#', '.######.', '#######.', '.######.', '..####..', '..####..'];
   for (let k = 0; k < 3; k++) {
-    const hx = W * 0.26 + k * 9, hyy = H * 0.7 + (k % 2) * 6;
-    ellipse(b, hx, hyy, 4, 5, hex('#8a3a1e'));
-    ellipse(b, hx, hyy + 1, 2, 2.6, hex('#3a2a28'));
-    for (let f = -2; f <= 2; f++) b.vline(Math.round(hx + f * 1.2), Math.round(hyy - 5), Math.round(hyy - 2), hex('#3a2a28'));
+    const hx = Math.round(W * 0.255 + k * 11), hyy = Math.round(H * 0.68 + (k % 2) * 7);
+    for (let y = -7; y <= 7; y++) for (let x = -6; x <= 6; x++) {
+      const d = Math.hypot(x, y * 0.85) / 7;
+      if (d < 1 && (1 - d) * 1.6 > bayer4(hx + x, hyy + y)) b.set(hx + x, hyy + y, k === 1 ? hex('#a8452a') : hex('#8a3a1e'));
+    }
+    const flip = k === 1;
+    HAND.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[flip ? row.length - 1 - i : i] === '#') b.set(hx - 4 + i, hyy - 4 + j, hex('#2e2628')); });
   }
   // campfire with people
   const fx = W * 0.44, fy = fg[Math.round(W * 0.44)] + 3;
