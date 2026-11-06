@@ -168,6 +168,7 @@ export const CHAPTERS: Chapter[] = [
       [0.5, 'Сушу осваивают рептилии и синапсиды — дальние предки млекопитающих.'],
     ],
     cam: [{ u: 0, rh: 0.4, lat: 5, lon: 10, phase: 45, tilt: 20 }, { u: 1, rh: 0.4, lat: 10, lon: 60, phase: 45, tilt: 20 }],
+    dio: { id: 'pangaeaDesert', a: 0.32, b: 0.72 },
   },
   {
     id: 'permian', title: 'Великое вымирание', eon: 'paleozoic', y0: Ma(252.6), y1: Ma(251.4), dur: 24,

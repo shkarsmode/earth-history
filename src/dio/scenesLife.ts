@@ -251,3 +251,32 @@ export function savanna(b: PixBuf, t: number, c: Ctx) {
   for (let i = 0; i < 4; i++) drawSprite(b, 'bird', wrapX(t * 14 + i * 60, W + 20) - 10, H * (0.2 + i * 0.03), t * 2 + i, { sil: hex('#3a2a30') });
 }
 
+
+// ============ Pangaea's interior: an Early Permian desert oasis ============
+export function pangaeaDesert(b: PixBuf, t: number, c: Ctx) {
+  const W = b.w, H = b.h, hy = Math.round(H * 0.56);
+  skyGradient(b, [[0, hex('#5a8ac4')], [0.6, hex('#a8c4d8')], [1, hex('#f2dcb0')]], 0, hy);
+  sunDisc(b, W * 0.24, H * 0.14, 10, hex('#fffbe8'), hex('#fff0c0'), hex('#f8dca0'), 3);
+  // red sandstone mesas on the horizon
+  ridge(b, { base: hy - 2, amp: 4, freq: 0.02, seed: 181, fill: hex('#b8664a'), edge: hex('#d8845a'),
+    peaks: (x) => { let p = 0; for (const [cx, w, h] of [[0.2, 50, 26], [0.58, 70, 34], [0.9, 40, 20]] as const) { const d = Math.abs(x - cx * W); if (d < w) p = Math.max(p, d < w * 0.75 ? h : h * (1 - (d - w * 0.75) / (w * 0.25))); } return p; },
+    shadeFn: (x, y, d) => (d % 6 === 0 && d > 0 ? hex('#a05a40') : x % 9 < 2 && d > 3 ? hex('#a8603e') : null) });
+  // heat shimmer band
+  for (let y = hy - 2; y < hy + 6; y++) for (let x = 0; x < W; x++) if (tn2(x * 0.08 + t * 2, y * 0.6) > 0.72) b.set(x, y, hex('#f0d8b0'));
+  // dunes
+  const dunes = ridge(b, { base: hy + 18, amp: 10, freq: 0.012, seed: 182, fill: hex('#d8935a'), edge: hex('#f0b070'),
+    shadeFn: (x, y, d) => (tn2(x * 0.05, y * 0.05) > 0.62 ? hex('#c07a48') : (d < 3 ? hex('#e8a868') : null)) });
+  // oasis with seed ferns and early conifers (Walchia)
+  const ox = W * 0.68;
+  for (let y = 0; y < 8; y++) b.hline(Math.round(ox - 40 + y * 2), Math.round(ox + 40 - y * 2), dunes[Math.round(ox)] + 2 + y, y < 2 ? hex('#6aa0b8') : hex('#4a8098'));
+  for (let i = 0; i < 6; i++) conifer(b, ox - 50 + i * 20 + hash(i) * 6, dunes[Math.round(clamp(ox - 50 + i * 20, 0, W - 1))] + 3, 22 + hash(i * 3) * 14, STY.devonian, i + 1400);
+  for (let i = 0; i < 5; i++) treefern(b, ox - 40 + i * 18, dunes[Math.round(clamp(ox - 40 + i * 18, 0, W - 1))] + 6, 14 + hash(i) * 6, STY.devonian, i + 1450, Math.sin(t * 0.7) * 1);
+  // dimetrodons: one walking, one basking with its sail to the sun
+  const fg = ridge(b, { base: H * 0.76, amp: 5, freq: 0.01, seed: 183, fill: hex('#c8844e'), edge: hex('#e09a5a'),
+    shadeFn: (x, y) => (tn2(x * 0.2, y * 0.3) > 0.7 ? hex('#b87444') : null) });
+  const dx = W * 0.3 + t * 5;
+  drawSprite(b, 'dimetrodon', dx, fg[Math.round(clamp(dx, 0, W - 1))] + 4, t);
+  drawSprite(b, 'dimetrodon', W * 0.84, fg[Math.round(W * 0.84)] + 5, 0, { frame: 0, flip: true });
+  // wind-blown sand
+  for (let i = 0; i < 90; i++) { const y = hy + 10 + hash(i * 1.7) * (H - hy - 10); const x = wrapX(hash(i * 2.9) * W + t * (50 + 30 * hash(i)), W); b.set(Math.round(x), Math.round(y), hex('#f0c890')); }
+}
