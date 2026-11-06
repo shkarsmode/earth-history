@@ -322,24 +322,24 @@ export function launch(b: PixBuf, t: number, c: Ctx) {
 // ============ 2026: the networked city ============
 export function city2026(b: PixBuf, t: number, c: Ctx) {
   const W = b.w, H = b.h;
-  skyGradient(b, [[0, hex('#04060e')], [0.55, hex('#0e1430')], [0.85, hex('#2a1e44')], [1, hex('#5a2e4a')]], 0, H);
-  stars(b, 60, 51, H * 0.4, c.amb, 0.55);
-  moonDisc(b, W * 0.8, H * 0.15, 10, [-0.5, -0.2, 0.8], {});
+  const shore = Math.round(H * 0.64); // the skyline stands on the far bank of a river
+  skyGradient(b, [[0, hex('#04060e')], [0.55, hex('#0e1430')], [0.85, hex('#2a1e44')], [1, hex('#5a2e4a')]], 0, shore);
+  stars(b, 60, 51, H * 0.35, c.amb, 0.55);
+  moonDisc(b, W * 0.8, H * 0.13, 10, [-0.5, -0.2, 0.8], {});
   // satellites crossing
-  for (let i = 0; i < 6; i++) { const ph = (t * 0.05 + hash(i * 3.1)) % 1; b.set(Math.round(ph * W), Math.round(H * 0.08 + hash(i * 7) * H * 0.25 + ph * 20), hex('#c8d0e0')); }
+  for (let i = 0; i < 6; i++) { const ph = (t * 0.05 + hash(i * 3.1)) % 1; b.set(Math.round(ph * W), Math.round(H * 0.06 + hash(i * 7) * H * 0.22 + ph * 20), hex('#c8d0e0')); }
   // three layers of towers
   const layers = [
-    { n: 34, hmin: 40, hmax: 110, base: H * 0.78, col: '#1a1630', win: 0.15, wc: '#5a4a7a' },
-    { n: 22, hmin: 60, hmax: 150, base: H * 0.88, col: '#100e1e', win: 0.35, wc: '#ffd890' },
-    { n: 12, hmin: 70, hmax: 190, base: H, col: '#08070e', win: 0.5, wc: '#ffe6a8' },
+    { n: 34, hmin: 30, hmax: 90, base: shore - 10, col: '#1a1630', win: 0.15, wc: '#5a4a7a' },
+    { n: 22, hmin: 45, hmax: 120, base: shore - 4, col: '#100e1e', win: 0.35, wc: '#ffd890' },
+    { n: 12, hmin: 55, hmax: 150, base: shore, col: '#08070e', win: 0.5, wc: '#ffe6a8' },
   ];
   for (const [li, L] of layers.entries()) {
     for (let i = 0; i < L.n; i++) {
       const x = Math.round(hash(i * 3.3 + li * 17) * (W + 40) - 20), w = 14 + Math.round(hash(i * 1.7 + li) * (12 + li * 8)), h = L.hmin + hash(i * 5.1 + li * 3) * (L.hmax - L.hmin);
       const top = Math.round(L.base - h);
-      b.rect(x, top, w, Math.round(h), hex(L.col));
+      b.rect(x, top, w, Math.round(L.base - top), hex(L.col));
       if (hash(i * 9 + li) > 0.6) { b.vline(x + (w >> 1), top - 10, top, hex(L.col)); if (Math.floor(c.amb * 1.5 + i) % 2 === 0) b.set(x + (w >> 1), top - 10, hex('#ff3a3a')); }
-      // window grid
       for (let wy = top + 3; wy < L.base - 2; wy += 3 + li) for (let wx = x + 2; wx < x + w - 2; wx += 3) {
         const h2 = hash(wx * 0.37 + wy * 1.31 + li * 7.7);
         if (h2 < L.win * (0.7 + 0.3 * Math.sin(c.amb * 0.3 + i))) b.set(wx, wy, hex(L.wc));
@@ -348,16 +348,19 @@ export function city2026(b: PixBuf, t: number, c: Ctx) {
     }
   }
   // data centre with cyan light strips (the age of AI)
-  const dx = Math.round(W * 0.34), dw = 70, dy = Math.round(H * 0.66);
-  b.rect(dx, dy, dw, H - dy, hex('#0c1218'));
-  for (let k = 0; k < 6; k++) { const on = (Math.floor(c.amb * 4) + k) % 6 !== 0; b.hline(dx + 4, dx + dw - 4, dy + 4 + k * 4, on ? hex('#3ae8f0') : hex('#1a6a7a')); }
-  glow(b, dx + dw / 2, dy + 12, 40, hex('#1a8a9a'), 0.25);
+  const dx = Math.round(W * 0.34), dw = 70, dy = shore - 26;
+  b.rect(dx, dy, dw, shore - dy, hex('#0c1218'));
+  for (let k = 0; k < 5; k++) { const on = (Math.floor(c.amb * 4) + k) % 5 !== 0; b.hline(dx + 4, dx + dw - 4, dy + 4 + k * 4, on ? hex('#3ae8f0') : hex('#1a6a7a')); }
+  glow(b, dx + dw / 2, dy + 10, 40, hex('#1a8a9a'), 0.25);
+  // embankment road with car lights
+  b.rect(0, shore, W, 3, hex('#14121c'));
+  for (let i = 0; i < 26; i++) { const x = wrapX(hash(i * 2.2) * W + t * (34 + hash(i) * 26) * (i % 2 ? 1 : -1), W); b.hline(Math.round(x), Math.round(x + 3), shore + 1, i % 2 ? hex('#ff4a3a') : hex('#fff4d0')); }
+  // the river mirrors the skyline (neon shimmer)
+  water(b, shore + 3, hex('#0a0e22'), 0.28, t, { ripple: 2 });
+  for (let i = 0; i < 70; i++) { const y = shore + 5 + Math.floor(hash(i * 3.7) * (H - shore - 6)); const x = Math.round(hash(i * 1.9) * W + Math.sin(t * 2 + i) * 2); if (Math.sin(t * 3 + i * 1.7) > 0.2) b.hline(x, x + 1 + (i % 3), y, i % 4 ? hex('#ffd890') : hex('#3ae8f0')); }
   // airliner and drones
-  airliner(b, wrapX(t * 20, W + 60) - 30, H * 0.22, Math.floor(c.amb * 2) % 2 === 0);
-  for (let i = 0; i < 5; i++) drone(b, W * (0.15 + i * 0.17) + Math.sin(t * 0.7 + i) * 12, H * (0.45 + (i % 3) * 0.06) + Math.cos(t + i) * 4, c.amb + i * 0.3);
-  // street light streaks
-  const sy = H - 5;
-  for (let i = 0; i < 30; i++) { const x = wrapX(hash(i * 2.2) * W + t * (40 + hash(i) * 30) * (i % 2 ? 1 : -1), W); b.hline(Math.round(x), Math.round(x + 4), sy + (i % 2), i % 2 ? hex('#ff4a3a') : hex('#fff4d0')); }
+  airliner(b, wrapX(t * 20, W + 60) - 30, H * 0.3, Math.floor(c.amb * 2) % 2 === 0);
+  for (let i = 0; i < 5; i++) drone(b, W * (0.15 + i * 0.17) + Math.sin(t * 0.7 + i) * 12, H * (0.32 + (i % 3) * 0.05) + Math.cos(t + i) * 4, c.amb + i * 0.3);
 }
 
 // ============ A city of the future (scenario) ============
